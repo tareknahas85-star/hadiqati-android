@@ -220,7 +220,7 @@ input:focus{outline:none;border-color:var(--g2);box-shadow:0 0 0 3px rgba(46,125
   <input type="file" id="fi-gal"  accept="image/*"                       onchange="onPhoto(this)" style="display:none">
   <div id="idResult"></div>
   <div id="noKeyHint" style="display:none" class="nbox">
-    🔑 أدخل مفتاح Plant.id API في الإعدادات للتعرف على النباتات
+    🔑 أدخل مفتاح API في الإعدادات (Plant.id أو Gemini)
     <br><a href="#" onclick="showScr('Settings');return false" style="color:var(--g2);font-weight:700">← فتح الإعدادات</a>
   </div>
 </div>
@@ -236,11 +236,25 @@ input:focus{outline:none;border-color:var(--g2);box-shadow:0 0 0 3px rgba(46,125
 <!-- SETTINGS -->
 <div id="sSettings" class="scr">
   <div class="card">
-    <div class="card-hd">🔑 مفتاح Plant.id API</div>
-    <span class="lbl">مفتاح API</span>
-    <input type="password" id="apiKey" placeholder="أدخل المفتاح هنا" dir="ltr">
-    <div id="keyStatus"></div>
-    <div class="hint">احصل على مفتاح مجاني من <a href="https://plant.id" style="color:var(--g2)">plant.id</a> — 200 تعريف/شهر مجاناً (المفتاح يبدأ بـ API v3)</div>
+    <div class="card-hd">🔑 خدمة التعرف على النباتات</div>
+    <span class="lbl">اختر الخدمة:</span>
+    <div class="seg" style="margin-top:8px">
+      <button class="seg-btn on" id="api-plantid" onclick="setApiSource('plantid')">🌿 Plant.id</button>
+      <button class="seg-btn" id="api-gemini"  onclick="setApiSource('gemini')">✨ Gemini AI</button>
+    </div>
+    <!-- Plant.id fields -->
+    <div id="plantid-fields">
+      <span class="lbl">مفتاح Plant.id</span>
+      <input type="password" id="apiKey" placeholder="أدخل المفتاح هنا" dir="ltr">
+      <div class="hint">من <a href="https://admin.kindwise.com" style="color:var(--g2)">admin.kindwise.com</a> — 100 credit مجاناً</div>
+    </div>
+    <!-- Gemini fields -->
+    <div id="gemini-fields" style="display:none">
+      <span class="lbl">مفتاح Gemini API</span>
+      <input type="password" id="geminiKey" placeholder="أدخل مفتاح Gemini" dir="ltr">
+      <div class="hint">من <a href="https://aistudio.google.com" style="color:var(--g2)">aistudio.google.com</a> — <strong>1500 تعريف/يوم مجاناً</strong> ✨ بدون بطاقة بنكية</div>
+    </div>
+    <div id="keyStatus" style="margin-top:8px"></div>
     <button class="save-btn" onclick="saveKey()">💾 حفظ المفتاح</button>
   </div>
   <div class="card">
@@ -498,8 +512,9 @@ function onPhoto(inp){
     img.src=e.target.result;img.style.display='block';
     document.getElementById('camPh').style.display='none';
     document.getElementById('idResult').innerHTML='';
-    const key=localStorage.getItem('pkey');
-    if(!key){document.getElementById('noKeyHint').style.display='block';return;}
+    const src=localStorage.getItem('apiSource')||'plantid';
+    const hasKey=src==='gemini'?!!localStorage.getItem('gkey'):!!localStorage.getItem('pkey');
+    if(!hasKey){document.getElementById('noKeyHint').style.display='block';return;}
     document.getElementById('noKeyHint').style.display='none';
     doIdentify(); // auto-identify
   };
@@ -507,44 +522,137 @@ function onPhoto(inp){
 }
 
 async function doIdentify(){
-  const key=localStorage.getItem('pkey');
-  if(!key){showScr('Settings');toast('أدخل مفتاح API في الإعدادات');return;}
   if(!b64){toast('التقط صورة أولاً');return;}
-  document.getElementById('idResult').innerHTML=`<div class="loading"><div class="spin"></div><p style="margin-top:10px">جاري التعرف على النبتة والكشف عن الأمراض...</p></div>`;
-  // Plant.id API v3 — uses Api-Key header (not api_key in body)
-  const hdrs={'Content-Type':'application/json','Api-Key':key};
-  const imgArr=['data:image/jpeg;base64,'+b64];
+  const src=localStorage.getItem('apiSource')||'plantid';
+  document.getElementById('idResult').innerHTML=`<div class="loading"><div class="spin"></div><p style="margin-top:10px">جاري التعرف على النبتة...</p></div>`;
   try{
-    const [res,hRes]=await Promise.all([
-      fetch('https://api.plant.id/v3/identification',{
-        method:'POST',headers:hdrs,
-        body:JSON.stringify({images:imgArr,similar_images:true,
-          plant_details:['common_names','url','description','taxonomy']})
-      }),
-      fetch('https://api.plant.id/v3/health_assessment',{
-        method:'POST',headers:hdrs,
-        body:JSON.stringify({images:imgArr,similar_images:false,
-          health_details:['description','treatment']})
-      })
-    ]);
-    // Better error messages
-    if(res.status===401){
-      throw new Error('401 — مفتاح API غير صالح أو منتهي الصلاحية\nتحقق من مفتاحك على plant.id');
+    if(src==='gemini'){
+      await doIdentifyGemini();
+    }else{
+      await doIdentifyPlantId();
     }
-    if(res.status===429){throw new Error('429 — تجاوزت الحد الشهري للتعريفات (200/شهر)');}
-    if(!res.ok){throw new Error('خطأ '+res.status+' من Plant.id API');}
-    const data =await res.json();
-    const health=hRes.ok?await hRes.json():null;
-    // v3 response: data.result.classification.suggestions
-    const sugs=data.result?.classification?.suggestions;
-    if(!sugs?.length){
-      document.getElementById('idResult').innerHTML='<div class="card"><p style="text-align:center;color:var(--txt3);padding:16px">لم يتمكن من التعرف — جرب صورة أوضح أو أقرب</p></div>';
-      return;
-    }
-    showResult(sugs,health);
   }catch(err){
     document.getElementById('idResult').innerHTML=`<div class="card"><p style="color:var(--red);padding:8px;white-space:pre-line">❌ ${err.message}</p></div>`;
   }
+}
+
+// ── Plant.id v3 ────────────────────────────────────────────────────────
+async function doIdentifyPlantId(){
+  const key=localStorage.getItem('pkey');
+  if(!key){showScr('Settings');throw new Error('أدخل مفتاح Plant.id في الإعدادات');}
+  const hdrs={'Content-Type':'application/json','Api-Key':key};
+  const imgArr=['data:image/jpeg;base64,'+b64];
+  const [res,hRes]=await Promise.all([
+    fetch('https://api.plant.id/v3/identification',{method:'POST',headers:hdrs,
+      body:JSON.stringify({images:imgArr,similar_images:true,
+        plant_details:['common_names','url','description','taxonomy']})}),
+    fetch('https://api.plant.id/v3/health_assessment',{method:'POST',headers:hdrs,
+      body:JSON.stringify({images:imgArr,similar_images:false,
+        health_details:['description','treatment']})})
+  ]);
+  if(res.status===401)throw new Error('401 — مفتاح Plant.id غير صالح
+تحقق من admin.kindwise.com');
+  if(res.status===429)throw new Error('429 — نفدت الـ credits. اصنع مفتاح جديد من admin.kindwise.com');
+  if(!res.ok)throw new Error('خطأ '+res.status+' من Plant.id');
+  const data=await res.json();
+  const health=hRes.ok?await hRes.json():null;
+  const sugs=data.result?.classification?.suggestions;
+  if(!sugs?.length){
+    document.getElementById('idResult').innerHTML='<div class="card"><p style="text-align:center;color:var(--txt3);padding:16px">لم يتمكن من التعرف — جرب صورة أوضح</p></div>';
+    return;
+  }
+  showResult(sugs,health);
+}
+
+// ── Gemini Vision ──────────────────────────────────────────────────────
+async function doIdentifyGemini(){
+  const key=localStorage.getItem('gkey');
+  if(!key){showScr('Settings');throw new Error('أدخل مفتاح Gemini في الإعدادات');}
+  const prompt=`أنت خبير نباتات. حلل هذه الصورة وأجب بـ JSON فقط بدون أي نص إضافي:
+{
+  "is_plant": true,
+  "name_ar": "اسم النبات بالعربية",
+  "name_sci": "Scientific name",
+  "confidence": 95,
+  "sun": "full أو partial أو shade",
+  "root": "shallow أو medium أو deep",
+  "water": "وصف الري",
+  "fertilize": "وصف التسميد",
+  "care_notes": "ملاحظات العناية",
+  "location_tip": "أفضل مكان للزرع",
+  "pot_tip": "نصيحة الحوض المناسب",
+  "is_healthy": true,
+  "disease_name": "اسم المرض إن وجد أو فارغ",
+  "disease_pct": 0,
+  "disease_desc": "وصف المرض",
+  "disease_treatment": "العلاج المقترح"
+}`;
+  const res=await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
+    {method:'POST',headers:{'Content-Type':'application/json'},
+     body:JSON.stringify({
+       contents:[{parts:[
+         {inline_data:{mime_type:'image/jpeg',data:b64}},
+         {text:prompt}
+       ]}],
+       generationConfig:{temperature:0.1,topP:0.8}
+     })}
+  );
+  if(res.status===400)throw new Error('400 — مفتاح Gemini غير صالح');
+  if(res.status===429)throw new Error('429 — تجاوزت الحد اليومي (1500/يوم) — جرب غداً');
+  if(!res.ok)throw new Error('خطأ '+res.status+' من Gemini API');
+  const data=await res.json();
+  const txt=data.candidates?.[0]?.content?.parts?.[0]?.text||'{}';
+  let parsed;
+  try{parsed=JSON.parse(txt.replace(/```json|```/g,'').trim());}
+  catch(e){throw new Error('خطأ في قراءة رد Gemini — حاول مرة ثانية');}
+  if(!parsed.is_plant){
+    document.getElementById('idResult').innerHTML='<div class="card"><p style="text-align:center;color:var(--txt3);padding:16px">⚠️ الصورة لا تحتوي على نبتة واضحة</p></div>';
+    return;
+  }
+  showResultGemini(parsed);
+}
+
+// ── Render Gemini result ───────────────────────────────────────────────
+function showResultGemini(p){
+  const dbMatch=PLANT_DB.find(d=>d.k.some(k=>
+    (p.name_sci||'').toLowerCase().includes(k)||k.includes((p.name_sci||'').toLowerCase().split(' ')[0])
+  ));
+  const inGarden=getGarden().some(g=>g.sciName===p.name_sci);
+  let h=`<div class="res-card">
+    <div class="res-name">${p.name_ar}</div>
+    <div class="res-sci">${p.name_sci}</div>
+    <div style="font-size:12px;color:var(--txt2)">دقة التعريف: ${p.confidence}% <span class="b bg" style="font-size:10px">✨ Gemini AI</span></div>
+    <div class="conf-bar"><div class="conf-fill" style="width:${p.confidence}%"></div></div>`;
+  // Disease
+  if(!p.is_healthy&&p.disease_name){
+    h+=`<div class="res-tag res-dis">🔬 <div><strong>${p.disease_name} (${p.disease_pct}%)</strong><br>
+      <span style="font-size:11px">${p.disease_desc||''}</span></div></div>`;
+    if(p.disease_treatment)h+=`<div class="nbox" style="margin-top:8px">💊 <strong>العلاج:</strong> ${p.disease_treatment}</div>`;
+  }else{
+    h+=`<div class="res-tag res-in">✅ النبتة بصحة جيدة</div>`;
+  }
+  // Care
+  const SUN={full:'☀️ شمس كاملة',partial:'⛅ شمس جزئية',shade:'🌑 ظل'};
+  const ROOT={shallow:'جذور سطحية',medium:'جذور متوسطة',deep:'جذور عميقة'};
+  h+=`<div style="margin-top:12px;background:var(--gbg);border-radius:10px;padding:10px 12px">
+    <div style="font-size:12px;font-weight:700;color:var(--g1);margin-bottom:6px">📋 توصيات العناية</div>
+    <div style="font-size:12px;color:var(--txt2);line-height:1.9">
+      🌊 ${p.water||'–'}<br>🌱 ${p.fertilize||'–'}<br>
+      ${SUN[p.sun]||p.sun||''} | 🌿 ${ROOT[p.root]||p.root||''}<br>
+      📝 ${p.care_notes||''}
+    </div></div>`;
+  if(p.location_tip)h+=`<div class="nbox" style="margin-top:8px">📍 <strong>أفضل مكان:</strong> ${p.location_tip}<br>🪴 <strong>الحوض:</strong> ${p.pot_tip||'–'}</div>`;
+  if(inGarden){
+    h+=`<div class="res-tag res-in" style="margin-top:10px">✅ موجودة في حديقتك</div>`;
+  }else{
+    h+=`<button class="btn btn-p" id="addBtn" style="margin-top:12px;width:100%"
+      onclick="showAddModal('${p.name_ar.replace(/'/g,"\'")}','${(p.name_sci||'').replace(/'/g,"\'")}','${(p.name_sci||'').replace(/'/g,"\'")}')">
+      ➕ أضف إلى حديقتي</button>`;
+  }
+  h+='</div>';
+  pendingResult={ar:p.name_ar,sci:p.name_sci,en:p.name_sci,dbMatch};
+  document.getElementById('idResult').innerHTML=h;
 }
 
 function arName(sci,names){
@@ -757,24 +865,48 @@ async function fetchWeather(){
 }
 
 // ── SETTINGS ─────────────────────────────────────────────────────────
-function saveKey(){
-  const v=document.getElementById('apiKey').value.trim();
-  if(!v){toast('أدخل المفتاح');return;}
-  localStorage.setItem('pkey',v);
-  updateKeyStatus(true);
-  toast('✓ تم حفظ مفتاح API');
+function setApiSource(src){
+  localStorage.setItem('apiSource',src);
+  document.getElementById('api-plantid').classList.toggle('on',src==='plantid');
+  document.getElementById('api-gemini').classList.toggle('on',src==='gemini');
+  document.getElementById('plantid-fields').style.display=src==='plantid'?'block':'none';
+  document.getElementById('gemini-fields').style.display=src==='gemini'?'block':'none';
+  updateKeyStatus(false);
 }
-function updateKeyStatus(ok){
+function saveKey(){
+  const src=localStorage.getItem('apiSource')||'plantid';
+  if(src==='gemini'){
+    const v=document.getElementById('geminiKey').value.trim();
+    if(!v){toast('أدخل مفتاح Gemini');return;}
+    localStorage.setItem('gkey',v);
+    updateKeyStatus(true,'gemini');
+    toast('✓ تم حفظ مفتاح Gemini');
+  }else{
+    const v=document.getElementById('apiKey').value.trim();
+    if(!v){toast('أدخل المفتاح');return;}
+    localStorage.setItem('pkey',v);
+    updateKeyStatus(true,'plantid');
+    toast('✓ تم حفظ مفتاح Plant.id');
+  }
+}
+function updateKeyStatus(ok,src){
   const el=document.getElementById('keyStatus');
   if(!el)return;
-  el.innerHTML=ok?
-    '<div class="key-status key-ok">✅ مفتاح API محفوظ وجاهز</div>':
-    '<div class="key-status key-no">❌ لم يُحفظ مفتاح API بعد</div>';
+  const s=src||localStorage.getItem('apiSource')||'plantid';
+  if(!ok){el.innerHTML='<div class="key-status key-no">❌ لم يُحفظ مفتاح بعد</div>';return;}
+  el.innerHTML=s==='gemini'
+    ?'<div class="key-status key-ok">✅ مفتاح Gemini محفوظ — 1500 تعريف/يوم مجاناً</div>'
+    :'<div class="key-status key-ok">✅ مفتاح Plant.id محفوظ وجاهز</div>';
 }
 function loadSettings(){
+  const src=localStorage.getItem('apiSource')||'plantid';
+  setApiSource(src);
   const k=localStorage.getItem('pkey');
   if(k)document.getElementById('apiKey').value=k;
-  updateKeyStatus(!!k);
+  const gk=localStorage.getItem('gkey');
+  if(gk)document.getElementById('geminiKey').value=gk;
+  const hasKey=src==='gemini'?!!gk:!!k;
+  updateKeyStatus(hasKey,src);
   const loc=JSON.parse(localStorage.getItem('loc')||'null');
   if(loc)document.getElementById('locStatus').textContent=`✅ الموقع محفوظ: ${loc.lat.toFixed(3)}, ${loc.lon.toFixed(3)}`;
   updateGoogleUI();
