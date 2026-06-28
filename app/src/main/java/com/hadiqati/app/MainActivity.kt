@@ -5,8 +5,12 @@ import android.os.Bundle
 import android.webkit.*
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.OnBackPressedCallback
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var webView: WebView
+
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -14,7 +18,7 @@ class MainActivity : AppCompatActivity() {
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
         )
-        val wv = WebView(this).apply {
+        webView = WebView(this).apply {
             settings.apply {
                 javaScriptEnabled = true
                 domStorageEnabled = true
@@ -26,11 +30,13 @@ class MainActivity : AppCompatActivity() {
             webChromeClient = WebChromeClient()
             loadUrl("file:///android_asset/index.html")
         }
-        setContentView(wv)
-    }
+        setContentView(webView)
 
-    override fun onBackPressed() {
-        val wv = contentView?.findViewWithTag<WebView>("wv")
-        if (wv?.canGoBack() == true) wv.goBack() else super.onBackPressed()
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (webView.canGoBack()) webView.goBack()
+                else finish()
+            }
+        })
     }
 }
