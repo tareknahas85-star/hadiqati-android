@@ -240,7 +240,7 @@ input:focus{outline:none;border-color:var(--g2);box-shadow:0 0 0 3px rgba(46,125
     <span class="lbl">مفتاح API</span>
     <input type="password" id="apiKey" placeholder="أدخل المفتاح هنا" dir="ltr">
     <div id="keyStatus"></div>
-    <div class="hint">احصل على مفتاح مجاني من <strong>plant.id</strong> — 200 تعريف/شهر مجاناً</div>
+    <div class="hint">احصل على مفتاح مجاني من <a href="https://plant.id" style="color:var(--g2)">plant.id</a> — 200 تعريف/شهر مجاناً (المفتاح يبدأ بـ API v3)</div>
     <button class="save-btn" onclick="saveKey()">💾 حفظ المفتاح</button>
   </div>
   <div class="card">
@@ -511,29 +511,39 @@ async function doIdentify(){
   if(!key){showScr('Settings');toast('أدخل مفتاح API في الإعدادات');return;}
   if(!b64){toast('التقط صورة أولاً');return;}
   document.getElementById('idResult').innerHTML=`<div class="loading"><div class="spin"></div><p style="margin-top:10px">جاري التعرف على النبتة والكشف عن الأمراض...</p></div>`;
+  // Plant.id API v3 — uses Api-Key header (not api_key in body)
+  const hdrs={'Content-Type':'application/json','Api-Key':key};
+  const imgArr=['data:image/jpeg;base64,'+b64];
   try{
-    // Run both APIs in parallel
     const [res,hRes]=await Promise.all([
-      fetch('https://api.plant.id/v2/identify',{
-        method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({images:['data:image/jpeg;base64,'+b64],api_key:key,
-          plant_details:['common_names','wiki_description','taxonomy']})
+      fetch('https://plant.id/api/v3/identification',{
+        method:'POST',headers:hdrs,
+        body:JSON.stringify({images:imgArr,similar_images:true,
+          plant_details:['common_names','url','description','taxonomy']})
       }),
-      fetch('https://api.plant.id/v2/health_assessment',{
-        method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({images:['data:image/jpeg;base64,'+b64],api_key:key})
+      fetch('https://plant.id/api/v3/health_assessment',{
+        method:'POST',headers:hdrs,
+        body:JSON.stringify({images:imgArr,similar_images:false,
+          health_details:['description','treatment']})
       })
     ]);
-    if(!res.ok)throw new Error('خطأ '+res.status);
-    const data=await res.json();
+    // Better error messages
+    if(res.status===401){
+      throw new Error('401 — مفتاح API غير صالح أو منتهي الصلاحية\nتحقق من مفتاحك على plant.id');
+    }
+    if(res.status===429){throw new Error('429 — تجاوزت الحد الشهري للتعريفات (200/شهر)');}
+    if(!res.ok){throw new Error('خطأ '+res.status+' من Plant.id API');}
+    const data =await res.json();
     const health=hRes.ok?await hRes.json():null;
-    if(!data.suggestions?.length){
-      document.getElementById('idResult').innerHTML='<div class="card"><p style="text-align:center;color:var(--txt3);padding:16px">لم يتمكن من التعرف — جرب صورة أوضح</p></div>';
+    // v3 response: data.result.classification.suggestions
+    const sugs=data.result?.classification?.suggestions;
+    if(!sugs?.length){
+      document.getElementById('idResult').innerHTML='<div class="card"><p style="text-align:center;color:var(--txt3);padding:16px">لم يتمكن من التعرف — جرب صورة أوضح أو أقرب</p></div>';
       return;
     }
-    showResult(data.suggestions,health);
+    showResult(sugs,health);
   }catch(err){
-    document.getElementById('idResult').innerHTML=`<div class="card"><p style="color:var(--red);padding:8px">❌ ${err.message}</p></div>`;
+    document.getElementById('idResult').innerHTML=`<div class="card"><p style="color:var(--red);padding:8px;white-space:pre-line">❌ ${err.message}</p></div>`;
   }
 }
 
@@ -557,9 +567,11 @@ function arName(sci,names){
 function showResult(sug,health){
   const top=sug[0];
   const conf=Math.round(top.probability*100);
-  const sci=top.plant_name||'';
-  const ar=arName(sci,top.plant_details?.common_names);
-  const wiki=(top.plant_details?.wiki_description?.value||'').substring(0,180);
+  // v3: top.name, top.details.common_names, top.details.description.value
+  const sci=top.name||top.plant_name||'';
+  const names=top.details?.common_names||top.plant_details?.common_names;
+  const ar=arName(sci,names);
+  const wiki=(top.details?.description?.value||top.plant_details?.wiki_description?.value||'').substring(0,180);
   const dbMatch=PLANT_DB.find(p=>p.k.some(k=>sci.toLowerCase().includes(k)||k.includes(sci.toLowerCase().split(' ')[0])));
   const inGarden=getGarden().some(p=>p.sciName===sci);
 
@@ -569,20 +581,26 @@ function showResult(sug,health){
     <div style="font-size:12px;color:var(--txt2)">دقة التعريف: ${conf}%</div>
     <div class="conf-bar"><div class="conf-fill" style="width:${conf}%"></div></div>`;
 
-  // Disease detection
-  const diseases=health?.health_assessment?.diseases?.filter(d=>d.probability>0.15)||[];
+  // Disease detection — supports both v2 and v3 response format
+  const v3diseases=health?.result?.disease?.suggestions?.filter(d=>d.probability>0.15)||[];
+  const v2diseases=health?.health_assessment?.diseases?.filter(d=>d.probability>0.15)||[];
+  const diseases=v3diseases.length?v3diseases:v2diseases;
+  const isHealthy=health?.result?.is_healthy?.binary;
   if(diseases.length){
     const topDis=diseases[0];
     const disPct=Math.round(topDis.probability*100);
+    // v3 description is a string, v2 is an object
+    const disDesc=typeof topDis.details?.description==='string'
+      ?topDis.details.description
+      :(topDis.disease_details?.description||'');
     h+=`<div class="res-tag res-dis">🔬 <div><strong>كُشف عن إصابة محتملة (${disPct}%):</strong><br>${topDis.name}<br>
-      <span style="font-size:11px">${topDis.disease_details?.description||''}</span></div></div>`;
-    if(topDis.disease_details?.treatment){
-      const t=topDis.disease_details.treatment;
-      const tips=[t.biological,t.chemical,t.prevention].filter(Boolean).join(' • ').substring(0,200);
-      if(tips)h+=`<div class="nbox" style="margin-top:8px">💊 <strong>العلاج:</strong> ${tips}</div>`;
-    }
+      <span style="font-size:11px">${disDesc.substring(0,150)}</span></div></div>`;
+    const t=topDis.details?.treatment||topDis.disease_details?.treatment||{};
+    const tips=[t.biological,t.chemical,t.prevention].filter(Boolean).join(' • ').substring(0,200);
+    if(tips)h+=`<div class="nbox" style="margin-top:8px">💊 <strong>العلاج:</strong> ${tips}</div>`;
   }else if(health){
-    h+=`<div class="res-tag res-in">✅ النبتة تبدو بصحة جيدة</div>`;
+    const msg=isHealthy===false?'⚠️ النبتة قد تعاني من مشكلة غير محددة':'✅ النبتة تبدو بصحة جيدة';
+    h+=`<div class="res-tag res-in">${msg}</div>`;
   }
 
   // Garden match info
