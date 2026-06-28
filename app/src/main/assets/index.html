@@ -516,12 +516,12 @@ async function doIdentify(){
   const imgArr=['data:image/jpeg;base64,'+b64];
   try{
     const [res,hRes]=await Promise.all([
-      fetch('https://plant.id/api/v3/identification',{
+      fetch('https://api.plant.id/v3/identification',{
         method:'POST',headers:hdrs,
         body:JSON.stringify({images:imgArr,similar_images:true,
           plant_details:['common_names','url','description','taxonomy']})
       }),
-      fetch('https://plant.id/api/v3/health_assessment',{
+      fetch('https://api.plant.id/v3/health_assessment',{
         method:'POST',headers:hdrs,
         body:JSON.stringify({images:imgArr,similar_images:false,
           health_details:['description','treatment']})
