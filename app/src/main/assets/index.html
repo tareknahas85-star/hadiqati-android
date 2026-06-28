@@ -5,11 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="حديقتي">
 <meta name="theme-color" content="#2E7D32">
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon.svg">
 <title>حديقتي 🌿</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -30,14 +27,14 @@
 body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:var(--txt);
   direction:rtl;max-width:430px;margin:0 auto;min-height:100vh;padding-bottom:72px;
   -webkit-font-smoothing:antialiased}
-/* ── HEADER ── */
 .hdr{background:var(--g2);color:#fff;padding:16px 16px 12px;position:sticky;top:0;z-index:100;
-  display:flex;justify-content:space-between;align-items:flex-end;
+  display:flex;justify-content:space-between;align-items:center;
   box-shadow:0 2px 8px rgba(0,0,0,.2)}
-.hdr-title{font-size:19px;font-weight:700;letter-spacing:.3px}
-.hdr-date{font-size:11px;opacity:.8;margin-top:2px}
-.hdr-badge{background:rgba(255,255,255,.2);border-radius:20px;padding:5px 10px;font-size:12px;font-weight:600}
-/* ── BOTTOM NAV ── */
+.hdr-left{display:flex;flex-direction:column;gap:2px}
+.hdr-title{font-size:18px;font-weight:700}
+.hdr-date{font-size:11px;opacity:.8}
+.hdr-badge{background:rgba(255,255,255,.2);border-radius:20px;padding:5px 11px;
+  font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;min-width:80px;text-align:center}
 .bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;
   background:#fff;border-top:1px solid var(--border2);display:flex;z-index:200;
   box-shadow:0 -2px 12px rgba(0,0,0,.08)}
@@ -46,24 +43,16 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:v
   color:var(--txt3);transition:color .15s}
 .nb .ni{font-size:22px;line-height:1}
 .nb.on{color:var(--g2)}
-/* ── SCREENS ── */
 .scr{display:none;padding:12px;animation:fadeIn .2s ease}
 .scr.on{display:block}
 @keyframes fadeIn{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:none}}
-/* ── CARDS ── */
 .card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:14px;margin-bottom:12px}
 .card-hd{font-size:14px;font-weight:700;color:var(--g1);margin-bottom:10px;display:flex;align-items:center;gap:6px}
-/* ── BADGES ── */
 .b{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap}
-.br{background:var(--rbg);color:var(--red)}
-.bo{background:var(--obg);color:var(--ora)}
-.by{background:var(--ybg);color:#E65100}
-.bg{background:var(--gbg);color:var(--g2)}
-.bb{background:var(--bbg);color:var(--blu)}
-.bp{background:var(--pbg);color:var(--pur)}
-.bt{background:var(--tbg);color:var(--teal)}
-.bgr{background:#F5F5F5;color:#666}
-/* ── PLANT ROW ── */
+.br{background:var(--rbg);color:var(--red)}.bo{background:var(--obg);color:var(--ora)}
+.by{background:var(--ybg);color:#E65100}.bg{background:var(--gbg);color:var(--g2)}
+.bb{background:var(--bbg);color:var(--blu)}.bp{background:var(--pbg);color:var(--pur)}
+.bt{background:var(--tbg);color:var(--teal)}.bgr{background:#F5F5F5;color:#666}
 .pr{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border2)}
 .pr:last-child{border-bottom:none}
 .pe{font-size:26px;width:36px;text-align:center;flex-shrink:0;line-height:1.2}
@@ -72,50 +61,34 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:v
 .ps{font-size:11px;color:var(--txt3);margin-top:1px}
 .pbd{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
 .pnt{font-size:11px;color:var(--txt3);margin-top:3px;line-height:1.5}
-/* ── SECTION TITLES ── */
-.st{font-size:13px;font-weight:700;color:var(--g1);margin:16px 0 8px;
-  display:flex;align-items:center;gap:6px}
+.st{font-size:13px;font-weight:700;color:var(--g1);margin:16px 0 8px;display:flex;align-items:center;gap:6px}
 .st-cnt{background:var(--g2);color:#fff;border-radius:10px;padding:1px 7px;font-size:11px}
-/* ── TODAY HEADER ── */
 .th{background:linear-gradient(135deg,var(--g2),var(--g3));color:#fff;
-  border-radius:var(--r);padding:14px;margin-bottom:14px;text-align:center;
-  box-shadow:var(--sh2)}
-.th-day{font-size:24px;font-weight:800;letter-spacing:.5px}
+  border-radius:var(--r);padding:14px;margin-bottom:14px;text-align:center;box-shadow:var(--sh2)}
+.th-day{font-size:24px;font-weight:800}
 .th-date{font-size:12px;opacity:.85;margin-top:2px}
 .th-stat{margin-top:10px;display:flex;justify-content:center;gap:16px}
 .th-item{text-align:center}
 .th-num{font-size:28px;font-weight:800;line-height:1}
 .th-lbl{font-size:10px;opacity:.8;margin-top:1px}
-/* ── NOTE BOX ── */
 .nbox{background:#FFFDE7;border-radius:10px;padding:10px 12px;font-size:12px;
   color:#5D4037;border-right:3px solid #FBC02D;margin-bottom:8px;line-height:1.5}
-/* ── CALENDAR CARD ── */
-.cal-card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);
-  padding:14px;margin-bottom:12px;border-right:4px solid var(--g2)}
-.cal-row{display:flex;align-items:center;gap:10px;padding:8px 0;
-  border-bottom:1px solid var(--border2);font-size:13px}
-.cal-row:last-child{border-bottom:none}
-.cal-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.cal-name{flex:1;font-weight:600}
-.cal-sub{font-size:11px;color:var(--txt3)}
-/* ── CAMERA SCREEN ── */
 .cam-wrap{background:#111;border-radius:var(--r);aspect-ratio:4/3;
   display:flex;align-items:center;justify-content:center;overflow:hidden;
-  margin-bottom:12px;position:relative;box-shadow:var(--sh2)}
+  margin-bottom:12px;position:relative;box-shadow:var(--sh2);cursor:pointer}
 .cam-wrap img{width:100%;height:100%;object-fit:cover;display:none;border-radius:var(--r)}
-.cam-ph{color:#fff;opacity:.35;text-align:center}
-.cam-ph .ci{font-size:52px;display:block;margin-bottom:6px}
-.cam-ph p{font-size:12px}
-/* ── BUTTONS ── */
-.btns{display:flex;gap:10px;margin-bottom:14px}
+.cam-ph{color:#fff;opacity:.4;text-align:center;pointer-events:none}
+.cam-ph .ci{font-size:56px;display:block;margin-bottom:8px}
+.cam-ph p{font-size:13px;line-height:1.5}
+.btns{display:flex;gap:10px;margin-bottom:12px}
 .btn{flex:1;padding:13px;border:none;border-radius:var(--r2);font-size:14px;font-weight:700;
   cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;
   gap:7px;transition:transform .1s,opacity .1s;box-shadow:var(--sh)}
 .btn:active{transform:scale(.97);opacity:.9}
-.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
 .btn-p{background:var(--g2);color:#fff}
 .btn-s{background:var(--gbg);color:var(--g2);border:2px solid var(--g2)}
-/* ── RESULT ── */
+.btn-d{background:var(--rbg);color:var(--red);border:2px solid var(--red)}
 .res-card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh2);
   padding:16px;margin-bottom:12px;border-right:4px solid var(--g2)}
 .res-name{font-size:20px;font-weight:800;color:var(--g1);margin-bottom:2px}
@@ -126,12 +99,11 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:v
   display:flex;align-items:flex-start;gap:8px;line-height:1.5}
 .res-in{background:var(--gbg);color:var(--g1)}
 .res-out{background:var(--obg);color:var(--ora)}
-/* ── SPINNER ── */
+.res-dis{background:var(--rbg);color:var(--red)}
 .spin{border:3px solid var(--border);border-top:3px solid var(--g2);
   border-radius:50%;width:32px;height:32px;animation:sp .7s linear infinite;margin:0 auto}
 @keyframes sp{to{transform:rotate(360deg)}}
 .loading{text-align:center;padding:24px;color:var(--txt2);font-size:13px}
-/* ── INPUTS ── */
 input[type=text],input[type=password]{
   width:100%;padding:11px 12px;border:1.5px solid var(--border);border-radius:var(--r2);
   font-size:14px;font-family:inherit;background:var(--card);color:var(--txt);
@@ -142,52 +114,76 @@ input:focus{outline:none;border-color:var(--g2);box-shadow:0 0 0 3px rgba(46,125
 .save-btn{background:var(--g2);color:#fff;border:none;border-radius:var(--r2);
   padding:11px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;
   margin-top:10px;box-shadow:var(--sh)}
-/* ── SEARCH & CHIPS ── */
 .srch{position:relative;margin-bottom:10px}
 .srch input{direction:rtl;padding-right:36px}
-.srch-ic{position:absolute;right:12px;top:50%;transform:translateY(-50%);
-  color:var(--txt3);font-size:15px;pointer-events:none}
+.srch-ic{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--txt3);font-size:15px;pointer-events:none}
 .chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px;
   -webkit-overflow-scrolling:touch;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
 .chip{flex-shrink:0;padding:6px 13px;border-radius:20px;font-size:12px;font-weight:600;
   border:1.5px solid var(--border);background:var(--card);color:var(--txt2);
-  cursor:pointer;font-family:inherit;transition:all .15s}
+  cursor:pointer;font-family:inherit}
 .chip.on{background:var(--g2);color:#fff;border-color:var(--g2)}
-/* ── EMPTY ── */
-.empty{text-align:center;padding:32px 16px;color:var(--txt3)}
-.empty .ei{font-size:48px;margin-bottom:8px}
-/* ── TOAST ── */
+.empty{text-align:center;padding:40px 16px;color:var(--txt3)}
+.empty .ei{font-size:56px;margin-bottom:10px}
+.empty p{line-height:1.7}
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
   background:#333;color:#fff;padding:10px 22px;border-radius:24px;font-size:13px;
   z-index:999;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}
 .toast.on{opacity:1}
-/* ── NEXT CARD ── */
 .nxt-card{background:var(--card);border-radius:var(--r);padding:12px;margin-bottom:12px;
   box-shadow:var(--sh);display:flex;align-items:center;gap:12px}
 .nxt-ic{font-size:28px;width:40px;text-align:center}
 .nxt-info{flex:1}
-.nxt-title{font-size:13px;font-weight:700;color:var(--txt)}
+.nxt-title{font-size:13px;font-weight:700}
 .nxt-sub{font-size:11px;color:var(--txt3);margin-top:2px}
-.nxt-days{background:var(--gbg);color:var(--g2);font-size:13px;font-weight:800;
-  padding:6px 12px;border-radius:10px;text-align:center}
-/* ── DARK MODE ── */
+.nxt-days{background:var(--gbg);color:var(--g2);font-size:13px;font-weight:800;padding:6px 12px;border-radius:10px;text-align:center}
+/* key status */
+.key-status{display:flex;align-items:center;gap:8px;margin-top:8px;padding:8px 12px;
+  border-radius:10px;font-size:13px;font-weight:600}
+.key-ok{background:var(--gbg);color:var(--g2)}
+.key-no{background:var(--rbg);color:var(--red)}
+/* pot modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;
+  display:flex;align-items:flex-end;justify-content:center}
+.modal{background:var(--card);border-radius:var(--r) var(--r) 0 0;padding:20px;
+  width:100%;max-width:430px;max-height:80vh;overflow-y:auto;animation:slideUp .25s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal h3{font-size:16px;font-weight:700;color:var(--g1);margin-bottom:16px;text-align:center}
+.seg{display:flex;gap:8px;margin-bottom:16px}
+.seg-btn{flex:1;padding:12px;border-radius:var(--r2);font-size:14px;font-weight:700;
+  border:2px solid var(--border);background:var(--card);color:var(--txt2);cursor:pointer;font-family:inherit}
+.seg-btn.on{background:var(--g2);color:#fff;border-color:var(--g2)}
+.field-row{display:flex;gap:8px}
+.field-row>div{flex:1}
+.info-pill{background:var(--tbg);color:var(--teal);border-radius:10px;padding:6px 10px;
+  font-size:11px;margin:4px 2px;display:inline-block}
+/* garden card actions */
+.g-card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);
+  margin-bottom:10px;overflow:hidden}
+.g-card-body{padding:12px 14px;display:flex;align-items:flex-start;gap:10px}
+.g-card-foot{border-top:1px solid var(--border2);padding:8px 14px;
+  display:flex;gap:8px;background:var(--glt)}
+.g-del-btn{background:none;border:none;color:var(--red);font-size:12px;font-weight:700;
+  cursor:pointer;padding:4px 8px;border-radius:8px;font-family:inherit}
+.g-del-btn:hover{background:var(--rbg)}
 @media(prefers-color-scheme:dark){
   :root{--card:#1E1E1E;--bg:#121212;--border:#333;--border2:#2A2A2A;--txt:#E0E0E0;--txt2:#AAA;--txt3:#666}
-  .bnav,.hdr{box-shadow:none}
   .bnav{background:#1A1A1A;border-top:1px solid var(--border)}
   .nb.on{color:var(--g4)}
   input{background:#252525;color:#E0E0E0;border-color:#333}
+  .modal{background:#1E1E1E}
+  .g-card-foot{background:#252525}
 }
 </style>
 </head>
 <body>
 <header class="hdr">
-  <div>
-    <div class="hdr-date" id="hdrDate"></div>
+  <div class="hdr-left">
     <div class="hdr-title">🌿 حديقة السطح</div>
+    <div class="hdr-date" id="hdrDate"></div>
   </div>
-  <div class="hdr-badge" id="hdrBadge">☀️ 37°م</div>
+  <div class="hdr-badge" id="hdrBadge" onclick="requestLocation()">☀️ –°م</div>
 </header>
 
 <!-- TODAY -->
@@ -205,21 +201,20 @@ input:focus{outline:none;border-color:var(--g2);box-shadow:0 0 0 3px rgba(46,125
 
 <!-- IDENTIFY -->
 <div id="sIdentify" class="scr">
-  <div class="cam-wrap" id="camWrap">
+  <div class="cam-wrap" id="camWrap" onclick="pickPhoto()">
     <img id="camImg" alt="">
     <div class="cam-ph" id="camPh">
       <span class="ci">📷</span>
-      <p>التقط صورة لنبتة<br>لمعرفة اسمها وعنايتها</p>
+      <p>اضغط لتصوير نبتة<br>أو رفع صورة</p>
     </div>
   </div>
   <div class="btns">
     <button class="btn btn-p" onclick="openCamera()">📷 كاميرا</button>
     <button class="btn btn-s" onclick="openGallery()">🖼️ من الجهاز</button>
   </div>
-  <div class="btns" style="margin-top:-2px">
-    <button class="btn btn-p" id="idBtn" onclick="doIdentify()" disabled style="opacity:.45">🔍 تعرف عليها</button>
-  </div>
-  <input type="file" id="fi" accept="image/*" onchange="onPhoto(this)" style="display:none">
+  <!-- hidden inputs as fallback when Android bridge is not available -->
+  <input type="file" id="fi-cam"  accept="image/*" capture="environment" onchange="onPhoto(this)" style="display:none">
+  <input type="file" id="fi-gal"  accept="image/*"                       onchange="onPhoto(this)" style="display:none">
   <div id="idResult"></div>
   <div id="noKeyHint" style="display:none" class="nbox">
     🔑 أدخل مفتاح Plant.id API في الإعدادات للتعرف على النباتات
@@ -232,7 +227,6 @@ input:focus{outline:none;border-color:var(--g2);box-shadow:0 0 0 3px rgba(46,125
   <div class="srch"><span class="srch-ic">🔍</span>
     <input type="text" id="srchQ" placeholder="ابحث باسم النبات..." oninput="renderGarden()">
   </div>
-  <div class="chips" id="catChips"></div>
   <div id="gardenBody"></div>
 </div>
 
@@ -242,130 +236,146 @@ input:focus{outline:none;border-color:var(--g2);box-shadow:0 0 0 3px rgba(46,125
     <div class="card-hd">🔑 مفتاح Plant.id API</div>
     <span class="lbl">مفتاح API</span>
     <input type="password" id="apiKey" placeholder="أدخل المفتاح هنا" dir="ltr">
-    <div class="hint">احصل على مفتاح مجاني من <strong>plant.id</strong> — 200 طلب تعريف مجاناً/شهر</div>
+    <div id="keyStatus"></div>
+    <div class="hint">احصل على مفتاح مجاني من <strong>plant.id</strong> — 200 تعريف/شهر مجاناً</div>
     <button class="save-btn" onclick="saveKey()">💾 حفظ المفتاح</button>
   </div>
   <div class="card">
-    <div class="card-hd">📅 Google Calendar</div>
-    <div style="font-size:13px;color:var(--txt2);line-height:1.7">
-      <div>📧 <strong>tareknahas85@gmail.com</strong></div>
-      <div style="margin-top:8px;display:flex;flex-direction:column;gap:6px">
-        <div class="b bg">🌿 ري يومي إجباري — كل يوم</div>
-        <div class="b bo">🍊 ري مشروط — كل يوم (فحص التربة)</div>
-        <div class="b by">🌿 ري يوم بعد يوم — كل يومين</div>
-        <div class="b bb">💜 لافندر وإكليل — كل 3 أيام</div>
-        <div class="b bb">🌵 صباريات — كل 6 أيام</div>
-        <div class="b bo">🌱 تسميد NPK + حديد — كل 15 يوماً</div>
-        <div class="b bg">🌱 تسميد شهري — أول كل شهر</div>
-      </div>
-      <div style="margin-top:10px">
-        <a href="https://calendar.google.com" target="_blank"
-          style="background:var(--g2);color:#fff;padding:8px 16px;border-radius:10px;
-          text-decoration:none;font-size:12px;font-weight:700;display:inline-block">
-          📅 فتح Google Calendar
-        </a>
-      </div>
-    </div>
+    <div class="card-hd">🌍 الطقس والموقع</div>
+    <p style="font-size:13px;color:var(--txt2);margin-bottom:10px">
+      الطقس الحقيقي يساعد على تعديل مواعيد الري تلقائياً
+    </p>
+    <button class="save-btn" style="background:var(--blu)" onclick="requestLocation()">📍 تحديد موقعي الآن</button>
+    <div id="locStatus" style="margin-top:8px;font-size:12px;color:var(--txt3)"></div>
   </div>
   <div class="card">
     <div class="card-hd">ℹ️ معلومات</div>
     <p style="font-size:12px;color:var(--txt2);line-height:1.7">
-      حديقة السطح — 32 نبات بروتوكول صيفي<br>
+      حديقة السطح — بروتوكول صيفي<br>
       درجة حرارة مرجعية: 37°م – 40°م<br>
       تاريخ بدء الجدول: 29 يونيو 2026
     </p>
   </div>
 </div>
 
+<!-- POT/GROUND MODAL -->
+<div id="modalBg" class="modal-bg" style="display:none" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>📍 أين ستزرع هذه النبتة؟</h3>
+    <div class="seg">
+      <button class="seg-btn on" id="seg-pot"    onclick="setSeg('pot')">🪴 حوض</button>
+      <button class="seg-btn"   id="seg-ground"  onclick="setSeg('ground')">🌍 أرض</button>
+    </div>
+    <!-- Pot details -->
+    <div id="pot-fields">
+      <p style="font-size:12px;color:var(--txt2);margin-bottom:10px">شكل الحوض:</p>
+      <div class="seg" style="margin-bottom:12px">
+        <button class="seg-btn on" id="sh-round"  onclick="setShape('round')">⭕ دائري</button>
+        <button class="seg-btn"   id="sh-rect"   onclick="setShape('rect')">▭ مستطيل</button>
+      </div>
+      <div id="round-fields">
+        <span class="lbl">القطر (سم)</span>
+        <input type="text" id="pot-diam" placeholder="مثال: 40">
+        <span class="lbl">العمق (سم)</span>
+        <input type="text" id="pot-dep1" placeholder="مثال: 35">
+      </div>
+      <div id="rect-fields" style="display:none">
+        <div class="field-row">
+          <div><span class="lbl">الطول (سم)</span><input type="text" id="pot-len" placeholder="60"></div>
+          <div><span class="lbl">العرض (سم)</span><input type="text" id="pot-wid" placeholder="40"></div>
+        </div>
+        <span class="lbl">العمق (سم)</span>
+        <input type="text" id="pot-dep2" placeholder="35">
+      </div>
+    </div>
+    <div id="ground-fields" style="display:none">
+      <div class="nbox">🌱 النبتة ستُزرع بالأرض المباشرة — لا قيود على الحجم</div>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:10px">
+      <button class="btn btn-s" onclick="closeModal()">إلغاء</button>
+      <button class="btn btn-p" onclick="confirmAdd()">➕ إضافة لحديقتي</button>
+    </div>
+  </div>
+</div>
+
 <nav class="bnav">
-  <button class="nb on" id="nToday" onclick="showScr('Today')"><span class="ni">📅</span>اليوم</button>
-  <button class="nb" id="nIdentify" onclick="showScr('Identify')"><span class="ni">📷</span>تعرف</button>
-  <button class="nb" id="nGarden" onclick="showScr('Garden')"><span class="ni">🌿</span>حديقتي</button>
-  <button class="nb" id="nSettings" onclick="showScr('Settings')"><span class="ni">⚙️</span>إعدادات</button>
+  <button class="nb on" id="nToday"    onclick="showScr('Today')"><span class="ni">📅</span>اليوم</button>
+  <button class="nb"    id="nIdentify" onclick="showScr('Identify')"><span class="ni">📷</span>تعرف</button>
+  <button class="nb"    id="nGarden"   onclick="showScr('Garden')"><span class="ni">🌿</span>حديقتي</button>
+  <button class="nb"    id="nSettings" onclick="showScr('Settings')"><span class="ni">⚙️</span>إعدادات</button>
 </nav>
 <div class="toast" id="toast"></div>
 
 <script>
-// ── PLANT DATA ────────────────────────────────────────────────────────
-const P = [
- {id:1, c:"fruit",ar:"شجرة ليمون صغيرة",en:"Lemon tree",wf:"daily",ff:"bw",fd:"NPK + حديد",nt:"نقص حديد — التسميد إجباري",k:["lemon","citrus limon","ليمون"],e:"🍋"},
- {id:2, c:"fruit",ar:"شجرة ليمون كبيرة",en:"Lemon tree",wf:"daily",ff:"bw",fd:"NPK + حديد",nt:"نقص حديد — التسميد إجباري",k:["lemon","citrus limon","ليمون"],e:"🍋"},
- {id:3, c:"fruit",ar:"شجرة برتقال",en:"Orange tree",wf:"flex",ff:"bw",fd:"NPK + حديد",nt:"راقب الأوراق — حافرات الأنفاق",k:["orange","citrus sinensis","برتقال"],e:"🍊"},
- {id:4, c:"fruit",ar:"كمكوات",en:"Kumquat",wf:"alt",ff:"bw",fd:"NPK + حديد",nt:"حساس لركود الماء — تأكد من التصريف",k:["kumquat","fortunella","كمكوات"],e:"🟠"},
- {id:5, c:"fruit",ar:"كلمنتينا",en:"Clementine",wf:"flex",ff:"bw",fd:"NPK + حديد",nt:"راقب الأوراق — حافرات الأنفاق",k:["clementine","كلمنتينا"],e:"🍊"},
- {id:6, c:"fruit",ar:"نانرج",en:"Seville orange",wf:"flex",ff:"bw",fd:"NPK + حديد",nt:"راقب الأوراق — حافرات الأنفاق",k:["seville","citrus aurantium","نانرج"],e:"🍊"},
- {id:7, c:"fruit",ar:"شجرة توت",en:"Mulberry",wf:"flex",ff:"bw",fd:"NPK + حديد",nt:"استهلاك ماء عالٍ — أوراق كبيرة",k:["mulberry","morus","توت"],e:"🫐"},
- {id:8, c:"fruit",ar:"شجرة خوخ",en:"Peach tree",wf:"flex",ff:"bw",fd:"NPK + حديد",nt:"استهلاك ماء عالٍ — أوراق كبيرة",k:["peach","prunus persica","خوخ"],e:"🍑"},
- {id:9, c:"fruit",ar:"دالية عنب",en:"Grapevine",wf:"flex",ff:"bw",fd:"NPK + حديد",nt:"استهلاك ماء عالٍ — أوراق كبيرة",k:["grape","vitis","عنب","vine"],e:"🍇"},
- {id:10,c:"fruit",ar:"شجرة جوز (3 سنوات)",en:"Walnut tree",wf:"alt",ff:"mo",fd:"NPK فقط",nt:"تُعامل كزينة — لن تثمر في الحوض",k:["walnut","juglans","جوز"],e:"🌰"},
- {id:11,c:"herb", ar:"نعنع",en:"Mint",wf:"daily",ff:"mo",fd:"NPK",nt:"رطوبة دائمة — مرتين يومياً في الحر",k:["mint","mentha","نعنع"],e:"🌿"},
- {id:12,c:"herb", ar:"مليسة",en:"Lemon balm",wf:"daily",ff:"mo",fd:"NPK",nt:"رطوبة دائمة — مرتين يومياً في الحر",k:["lemon balm","melissa","مليسة"],e:"🌿"},
- {id:13,c:"herb", ar:"عترة",en:"Thyme/Savory",wf:"alt",ff:"mo",fd:"جرعة خفيفة",nt:"نبتة قوية تتحمل الشمس",k:["thyme","savory","عترة","thymus"],e:"🌿"},
- {id:14,c:"herb", ar:"إكليل الجبل (أخضر)",en:"Rosemary green",wf:"e3",ff:"ban",fd:"محظور",nt:"الري الزائد يعفن الجذور",k:["rosemary","rosmarinus","إكليل"],e:"🌿"},
- {id:15,c:"herb", ar:"إكليل الجبل (أزرق فاتح)",en:"Rosemary blue",wf:"e3",ff:"ban",fd:"محظور",nt:"الري الزائد يعفن الجذور",k:["rosemary","rosmarinus","إكليل"],e:"🌿"},
- {id:16,c:"herb", ar:"لافندر (النوع الأول)",en:"Lavender 1",wf:"e3",ff:"ban",fd:"محظور",nt:"التسميد والماء الزائد يقتلانها",k:["lavender","lavandula","لافندر"],e:"💜"},
- {id:17,c:"herb", ar:"لافندر (النوع الثاني)",en:"Lavender 2",wf:"e3",ff:"ban",fd:"محظور",nt:"التسميد والماء الزائد يقتلانها",k:["lavender","lavandula","لافندر"],e:"💜"},
- {id:18,c:"flower",ar:"غاردينيا",en:"Gardenia",wf:"daily",ff:"mi",fd:"حديد تركيز عالٍ",nt:"حساسة جداً للعطش وتكلس التربة",k:["gardenia","غاردينيا"],e:"🌸"},
- {id:19,c:"flower",ar:"ياسمين بلدي",en:"Jasmine local",wf:"alt",ff:"mo",fd:"NPK + حديد",nt:"يتحمل الحرارة أكثر من الهندي",k:["jasmine","jasminum","ياسمين"],e:"🌼"},
- {id:20,c:"flower",ar:"ياسمين عراقي",en:"Jasmine Iraqi",wf:"alt",ff:"mo",fd:"NPK + حديد",nt:"يتحمل الحرارة أكثر من الهندي",k:["jasmine","jasminum","ياسمين"],e:"🌼"},
- {id:21,c:"flower",ar:"ياسمين هندي",en:"Indian jasmine",wf:"alt",ff:"mo",fd:"NPK + حديد",nt:"أوراقه كبيرة — يبخر الماء أسرع",k:["jasmine","jasminum sambac","ياسمين"],e:"🌼"},
- {id:22,c:"flower",ar:"ورد جوري",en:"Damascus rose",wf:"alt",ff:"mo",fd:"فوسفور عالٍ",nt:"افحص الأوراق السفلى — المن الأسود",k:["rose","rosa","ورد","damascus rose"],e:"🌹"},
- {id:23,c:"flower",ar:"خبيزة",en:"Mallow",wf:"alt",ff:"mo",fd:"جرعة خفيفة",nt:"نبتة قوية تتحمل الشمس",k:["mallow","malva","خبيزة"],e:"🌸"},
- {id:24,c:"flower",ar:"زهرة فم السمكة",en:"Snapdragon",wf:"alt",ff:"mo",fd:"NPK",nt:"حولية — طاقة مستمرة للتزهير",k:["snapdragon","antirrhinum","فم السمكة"],e:"🌺"},
- {id:25,c:"flower",ar:"وش القطة",en:"Pansy/Viola",wf:"alt",ff:"mo",fd:"NPK",nt:"حولية — طاقة مستمرة للتزهير",k:["pansy","viola","وش القطة"],e:"🌸"},
- {id:26,c:"flower",ar:"الزهر الصغير (متنوع)",en:"Mixed flowers",wf:"alt",ff:"mo",fd:"NPK",nt:"حولية — طاقة مستمرة للتزهير",k:["flowers","زهر"],e:"🌺"},
- {id:27,c:"veg",  ar:"عباد الشمس",en:"Sunflower",wf:"alt",ff:"mo",fd:"NPK",nt:"حولية — طاقة مستمرة للتزهير",k:["sunflower","helianthus","عباد الشمس"],e:"🌻"},
- {id:28,c:"veg",  ar:"فليفلة حادة (أحمر)",en:"Red chili",wf:"alt",ff:"mo",fd:"NPK",nt:"العطش يسقط الأزهار قبل عقد الثمار",k:["pepper","capsicum","فليفلة","chili"],e:"🌶️"},
- {id:29,c:"veg",  ar:"فليفلة حادة (أصفر)",en:"Yellow chili",wf:"alt",ff:"mo",fd:"NPK",nt:"العطش يسقط الأزهار قبل عقد الثمار",k:["pepper","capsicum","فليفلة","chili"],e:"🫑"},
- {id:30,c:"cactus",ar:"صبارة",en:"Cactus",wf:"e6",ff:"ban",fd:"محظور",nt:"الري الزائد يعفنها فوراً",k:["cactus","صبارة","cacti"],e:"🌵"},
- {id:31,c:"cactus",ar:"ألوفيرا",en:"Aloe vera",wf:"e6",ff:"ban",fd:"محظور",nt:"الري الزائد يعفنها فوراً",k:["aloe","aloe vera","ألوفيرا"],e:"🌵"},
- {id:32,c:"tree", ar:"سرو ليموني",en:"Lemon cypress",wf:"alt",ff:"ban",fd:"محظور",nt:"توازن دقيق — لا عطش ولا تغديق",k:["cypress","cupressus","سرو","lemon cypress"],e:"🌲"},
+// ── REFERENCE DATABASE (not pre-loaded in garden) ─────────────────────
+const PLANT_DB = [
+ {c:"fruit",ar:"شجرة ليمون",en:"Lemon tree",wf:"daily",ff:"bw",fd:"NPK + حديد",nt:"نقص حديد — التسميد إجباري",sun:"full",root:"medium",k:["lemon","citrus limon","ليمون"],e:"🍋"},
+ {c:"fruit",ar:"شجرة برتقال",en:"Orange tree",wf:"flex",ff:"bw",fd:"NPK + حديد",nt:"راقب الأوراق — حافرات الأنفاق",sun:"full",root:"deep",k:["orange","citrus sinensis","برتقال"],e:"🍊"},
+ {c:"fruit",ar:"كمكوات",en:"Kumquat",wf:"alt",ff:"bw",fd:"NPK + حديد",nt:"حساس لركود الماء",sun:"full",root:"medium",k:["kumquat","fortunella","كمكوات"],e:"🟠"},
+ {c:"fruit",ar:"كلمنتينا",en:"Clementine",wf:"flex",ff:"bw",fd:"NPK + حديد",nt:"راقب الأوراق",sun:"full",root:"deep",k:["clementine","كلمنتينا"],e:"🍊"},
+ {c:"fruit",ar:"شجرة توت",en:"Mulberry",wf:"flex",ff:"bw",fd:"NPK + حديد",nt:"استهلاك ماء عالٍ",sun:"full",root:"deep",k:["mulberry","morus","توت"],e:"🫐"},
+ {c:"fruit",ar:"شجرة خوخ",en:"Peach tree",wf:"flex",ff:"bw",fd:"NPK + حديد",nt:"استهلاك ماء عالٍ",sun:"full",root:"deep",k:["peach","prunus persica","خوخ"],e:"🍑"},
+ {c:"fruit",ar:"دالية عنب",en:"Grapevine",wf:"flex",ff:"bw",fd:"NPK + حديد",nt:"استهلاك ماء عالٍ",sun:"full",root:"deep",k:["grape","vitis","عنب"],e:"🍇"},
+ {c:"herb",ar:"نعنع",en:"Mint",wf:"daily",ff:"mo",fd:"NPK",nt:"رطوبة دائمة",sun:"partial",root:"shallow",k:["mint","mentha","نعنع"],e:"🌿"},
+ {c:"herb",ar:"مليسة",en:"Lemon balm",wf:"daily",ff:"mo",fd:"NPK",nt:"رطوبة دائمة",sun:"partial",root:"shallow",k:["lemon balm","melissa","مليسة"],e:"🌿"},
+ {c:"herb",ar:"إكليل الجبل",en:"Rosemary",wf:"e3",ff:"ban",fd:"محظور",nt:"الري الزائد يعفن الجذور",sun:"full",root:"medium",k:["rosemary","rosmarinus","إكليل"],e:"🌿"},
+ {c:"herb",ar:"لافندر",en:"Lavender",wf:"e3",ff:"ban",fd:"محظور",nt:"التسميد والماء الزائد يقتلانها",sun:"full",root:"medium",k:["lavender","lavandula","لافندر"],e:"💜"},
+ {c:"flower",ar:"غاردينيا",en:"Gardenia",wf:"daily",ff:"mi",fd:"حديد تركيز عالٍ",nt:"حساسة للعطش وتكلس التربة",sun:"partial",root:"medium",k:["gardenia","غاردينيا"],e:"🌸"},
+ {c:"flower",ar:"ياسمين",en:"Jasmine",wf:"alt",ff:"mo",fd:"NPK + حديد",nt:"يتحمل الحرارة جيداً",sun:"full",root:"medium",k:["jasmine","jasminum","ياسمين"],e:"🌼"},
+ {c:"flower",ar:"ورد جوري",en:"Rose",wf:"alt",ff:"mo",fd:"فوسفور عالٍ",nt:"افحص الأوراق — المن الأسود",sun:"full",root:"medium",k:["rose","rosa","ورد"],e:"🌹"},
+ {c:"flower",ar:"خبيزة",en:"Mallow",wf:"alt",ff:"mo",fd:"جرعة خفيفة",nt:"نبتة قوية تتحمل الشمس",sun:"full",root:"shallow",k:["mallow","malva","خبيزة"],e:"🌸"},
+ {c:"veg",ar:"عباد الشمس",en:"Sunflower",wf:"alt",ff:"mo",fd:"NPK",nt:"حولية",sun:"full",root:"medium",k:["sunflower","helianthus","عباد الشمس"],e:"🌻"},
+ {c:"veg",ar:"فليفلة",en:"Pepper",wf:"alt",ff:"mo",fd:"NPK",nt:"العطش يسقط الأزهار",sun:"full",root:"medium",k:["pepper","capsicum","فليفلة"],e:"🌶️"},
+ {c:"cactus",ar:"صبارة",en:"Cactus",wf:"e6",ff:"ban",fd:"محظور",nt:"الري الزائد يعفنها فوراً",sun:"full",root:"shallow",k:["cactus","صبارة"],e:"🌵"},
+ {c:"cactus",ar:"ألوفيرا",en:"Aloe vera",wf:"e6",ff:"ban",fd:"محظور",nt:"الري الزائد يعفنها فوراً",sun:"partial",root:"shallow",k:["aloe","aloe vera","ألوفيرا"],e:"🌵"},
+ {c:"tree",ar:"سرو",en:"Cypress",wf:"alt",ff:"ban",fd:"محظور",nt:"توازن دقيق — لا عطش ولا تغديق",sun:"full",root:"deep",k:["cypress","cupressus","سرو"],e:"🌲"},
 ];
 
-const CLBL={fruit:"أشجار مثمرة",herb:"عطريات",flower:"زينة ومزهرات",veg:"حولية وخضار",cactus:"صباريات",tree:"أشجار زينة"};
-const WLBL={daily:"يومياً 🔴",flex:"يومياً أو يوم بعد يوم 🟠",alt:"يوم بعد يوم 🟡",e3:"كل 3–4 أيام 🟢",e6:"كل 5–7 أيام 🔵"};
-const WB  ={daily:"br",flex:"bo",alt:"by",e3:"bg",e6:"bb"};
+const CLBL={fruit:"أشجار مثمرة",herb:"عطريات",flower:"زينة ومزهرات",veg:"حولية وخضار",cactus:"صباريات",tree:"أشجار زينة",custom:"مضافة ⭐"};
+const WLBL={daily:"يومياً 🔴",flex:"يومياً / يوم بعد يوم 🟠",alt:"يوم بعد يوم 🟡",e3:"كل 3–4 أيام 🟢",e6:"كل 5–7 أيام 🔵"};
+const WB={daily:"br",flex:"bo",alt:"by",e3:"bg",e6:"bb"};
 const FLBL={bw:"⚡ كل 15 يوماً",mo:"✓ شهرياً",mi:"🔩 شهرياً حديد++",ban:"⛔ محظور"};
-const FB  ={bw:"bo",mo:"bg",mi:"bb",ban:"br"};
-const AR  ={"citrus limon":"شجرة الليمون","lemon":"الليمون","citrus sinensis":"شجرة البرتقال","orange":"البرتقال","mentha":"النعنع","mint":"النعنع","melissa":"المليسة","lemon balm":"المليسة","gardenia":"الغاردينيا","jasminum":"الياسمين","jasmine":"الياسمين","rosa":"الورد","rose":"الورد","lavandula":"اللافندر","lavender":"اللافندر","rosmarinus":"إكليل الجبل","rosemary":"إكليل الجبل","aloe":"الألوفيرا","aloe vera":"الألوفيرا","cactus":"الصبارة","cupressus":"السرو","cypress":"السرو","helianthus":"عباد الشمس","sunflower":"عباد الشمس","capsicum":"الفليفلة","pepper":"الفليفلة","morus":"شجرة التوت","mulberry":"شجرة التوت","prunus persica":"شجرة الخوخ","peach":"شجرة الخوخ","vitis":"العنب","grape":"العنب","juglans":"شجرة الجوز","walnut":"شجرة الجوز","fortunella":"الكمكوات","kumquat":"الكمكوات","malva":"الخبيزة","mallow":"الخبيزة","antirrhinum":"زهرة فم السمكة","snapdragon":"زهرة فم السمكة","viola":"البنفسج","pansy":"البنفسج"};
+const FB={bw:"bo",mo:"bg",mi:"bb",ban:"br"};
+const SUN_LBL={full:"☀️ شمس كاملة",partial:"⛅ شمس جزئية",shade:"🌑 ظل"};
+const ROOT_LBL={shallow:"جذور سطحية (<20سم)",medium:"جذور متوسطة (20–50سم)",deep:"جذور عميقة (>50سم)"};
+const WCODE={0:"☀️",1:"🌤️",2:"⛅",3:"☁️",45:"🌫️",51:"🌦️",61:"🌧️",80:"🌧️",95:"⛈️"};
 
-const START = new Date('2026-06-29T00:00:00');
-const FSTART= new Date('2026-07-01T00:00:00');
+const START=new Date('2026-06-29T00:00:00');
+const FSTART=new Date('2026-07-01T00:00:00');
 const DAYS_AR=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-const MON_AR =['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const MON_AR=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 
+// ── HELPERS ───────────────────────────────────────────────────────────
 function dd(d,ref){const a=new Date(d),b=new Date(ref);a.setHours(0,0,0,0);b.setHours(0,0,0,0);return Math.floor((a-b)/86400000);}
 function today(){const d=new Date();d.setHours(0,0,0,0);return d;}
+function getGarden(){return JSON.parse(localStorage.getItem('myGarden')||'[]');}
+function saveGarden(g){localStorage.setItem('myGarden',JSON.stringify(g));}
 
 function sWater(p,d){
   const n=dd(d,START);
   if(p.wf==='daily'||p.wf==='flex')return true;
-  if(p.wf==='alt') return n>=0&&n%2===0;
-  if(p.wf==='e3')  return n>=0&&n%3===0;
-  if(p.wf==='e6')  return n>=0&&n%6===0;
+  if(p.wf==='alt')return n>=0&&n%2===0;
+  if(p.wf==='e3')return n>=0&&n%3===0;
+  if(p.wf==='e6')return n>=0&&n%6===0;
   return false;
 }
 function sFert(p,d){
   if(p.ff==='ban')return false;
-  const n=dd(d,FSTART);
-  if(n<0)return false;
+  const n=dd(d,FSTART);if(n<0)return false;
   if(p.ff==='bw')return n%15===0;
   if(p.ff==='mo'||p.ff==='mi')return d.getDate()===1;
   return false;
 }
-function daysUntilNext(interval,startRef){
-  const n=dd(today(),startRef);
-  if(n<0)return Math.abs(n);
-  return interval-(n%interval);
-}
+function daysUntilNext(interval,startRef){const n=dd(today(),startRef);if(n<0)return Math.abs(n);return interval-(n%interval);}
 
-// ── NAV ──────────────────────────────────────────────────────────────
+// ── NAV ───────────────────────────────────────────────────────────────
 function showScr(name){
   document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
   document.getElementById('s'+name).classList.add('on');
   document.getElementById('n'+name).classList.add('on');
   if(name==='Garden')renderGarden();
+  if(name==='Settings')loadSettings();
 }
 
 // ── TODAY ─────────────────────────────────────────────────────────────
@@ -374,151 +384,105 @@ function renderToday(){
   document.getElementById('hdrDate').textContent=`${DAYS_AR[d.getDay()]} ${d.getDate()} ${MON_AR[d.getMonth()]}`;
   document.getElementById('tdDay').textContent=DAYS_AR[d.getDay()];
   document.getElementById('tdDate').textContent=`${d.getDate()} ${MON_AR[d.getMonth()]} ${d.getFullYear()}`;
-
-  const toW=P.filter(p=>sWater(p,d));
-  const toF=P.filter(p=>sFert(p,d));
-  document.getElementById('statWater').textContent=toW.length;
-  document.getElementById('statFert').textContent=toF.length||'—';
-
-  // Next schedule counters
+  const g=getGarden();
+  const toW=g.filter(p=>sWater(p,d));
+  const toF=g.filter(p=>sFert(p,d));
+  document.getElementById('statWater').textContent=toW.length||'–';
+  document.getElementById('statFert').textContent=toF.length||'–';
   const n15=daysUntilNext(15,FSTART);
   const nMo=new Date(d.getFullYear(),d.getMonth()+1,1);
   const dMo=Math.round((nMo-d)/86400000);
-
-  let html=`
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-      <div class="nxt-card">
-        <div class="nxt-ic">⚡</div>
-        <div class="nxt-info">
-          <div class="nxt-title">تسميد NPK</div>
-          <div class="nxt-sub">الأشجار المثمرة</div>
-        </div>
-        <div class="nxt-days">${n15===0?'اليوم':'بعد<br>'+n15+' أيام'}</div>
-      </div>
-      <div class="nxt-card">
-        <div class="nxt-ic">🌱</div>
-        <div class="nxt-info">
-          <div class="nxt-title">تسميد شهري</div>
-          <div class="nxt-sub">باقي النباتات</div>
-        </div>
-        <div class="nxt-days">${dMo===0?'اليوم':'بعد<br>'+dMo+' أيام'}</div>
-      </div>
-    </div>`;
-
-  const dly=toW.filter(p=>p.wf==='daily');
-  const flx=toW.filter(p=>p.wf==='flex');
-  const alt=toW.filter(p=>p.wf==='alt');
-  const rst=toW.filter(p=>!['daily','flex','alt'].includes(p.wf));
-
-  if(dly.length){
-    html+=`<div class="st">🔴 ري إجباري <span class="st-cnt">${dly.length}</span></div>`;
-    html+=`<div class="card">${dly.map(pRow).join('')}</div>`;
-  }
-  if(flx.length){
-    html+=`<div class="st">🟠 فحص التربة أولاً <span class="st-cnt">${flx.length}</span></div>`;
-    html+=`<div class="card"><div class="nbox">افحص رطوبة السطح — اسقِ فقط إذا كانت التربة جافة</div>${flx.map(pRow).join('')}</div>`;
-  }
-  if(alt.length){
-    html+=`<div class="st">🟡 يوم بعد يوم <span class="st-cnt">${alt.length}</span></div>`;
-    html+=`<div class="card">${alt.map(pRow).join('')}</div>`;
-  }
-  if(rst.length){
-    html+=`<div class="st">🟢 ري دوري <span class="st-cnt">${rst.length}</span></div>`;
-    html+=`<div class="card">${rst.map(pRow).join('')}</div>`;
-  }
-  if(toF.length){
-    html+=`<div class="st">🌱 تسميد اليوم <span class="st-cnt">${toF.length}</span></div>`;
-    html+=`<div class="card">${toF.map(p=>fRow(p)).join('')}</div>`;
-  }
-  if(!toW.length&&!toF.length){
-    html='<div class="empty"><div class="ei">✨</div><p>لا مهام اليوم</p></div>';
+  let html=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+    <div class="nxt-card"><div class="nxt-ic">⚡</div><div class="nxt-info"><div class="nxt-title">تسميد NPK</div><div class="nxt-sub">الأشجار المثمرة</div></div><div class="nxt-days">${n15===0?'اليوم':'بعد '+n15+' أيام'}</div></div>
+    <div class="nxt-card"><div class="nxt-ic">🌱</div><div class="nxt-info"><div class="nxt-title">تسميد شهري</div><div class="nxt-sub">باقي النباتات</div></div><div class="nxt-days">${dMo===0?'اليوم':'بعد '+dMo+' أيام'}</div></div>
+  </div>`;
+  if(!g.length){
+    html+='<div class="empty"><div class="ei">📷</div><p>صوّر نبتة من تبويب<br><strong>تعرف</strong> وأضفها لحديقتك<br>ليظهر جدولها هنا</p></div>';
+  }else{
+    const dly=toW.filter(p=>p.wf==='daily');
+    const flx=toW.filter(p=>p.wf==='flex');
+    const alt=toW.filter(p=>p.wf==='alt');
+    const rst=toW.filter(p=>!['daily','flex','alt'].includes(p.wf));
+    if(dly.length){html+=`<div class="st">🔴 ري إجباري <span class="st-cnt">${dly.length}</span></div><div class="card">${dly.map(pRow).join('')}</div>`;}
+    if(flx.length){html+=`<div class="st">🟠 فحص التربة <span class="st-cnt">${flx.length}</span></div><div class="card"><div class="nbox">افحص رطوبة السطح — اسقِ فقط إذا كانت التربة جافة</div>${flx.map(pRow).join('')}</div>`;}
+    if(alt.length){html+=`<div class="st">🟡 يوم بعد يوم <span class="st-cnt">${alt.length}</span></div><div class="card">${alt.map(pRow).join('')}</div>`;}
+    if(rst.length){html+=`<div class="st">🟢 دوري <span class="st-cnt">${rst.length}</span></div><div class="card">${rst.map(pRow).join('')}</div>`;}
+    if(toF.length){html+=`<div class="st">🌱 تسميد اليوم <span class="st-cnt">${toF.length}</span></div><div class="card">${toF.map(fRow).join('')}</div>`;}
+    if(!toW.length&&!toF.length){html+='<div class="empty"><div class="ei">✨</div><p>لا مهام ري أو تسميد اليوم</p></div>';}
   }
   document.getElementById('todayBody').innerHTML=html;
 }
-
-function pRow(p){return`<div class="pr"><div class="pe">${p.e}</div><div class="pi"><div class="pn">${p.ar}</div><div class="ps">${CLBL[p.c]}</div><div class="pbd"><span class="b ${WB[p.wf]}">${WLBL[p.wf]}</span></div></div></div>`;}
-function fRow(p){return`<div class="pr"><div class="pe">${p.e}</div><div class="pi"><div class="pn">${p.ar}</div><div class="ps">${CLBL[p.c]}</div><div class="pbd"><span class="b ${FB[p.ff]}">${FLBL[p.ff]}</span><span class="b bgr">${p.fd}</span></div></div></div>`;}
+function pRow(p){return`<div class="pr"><div class="pe">${p.e}</div><div class="pi"><div class="pn">${p.ar}</div><div class="pbd"><span class="b ${WB[p.wf]}">${WLBL[p.wf]}</span></div></div></div>`;}
+function fRow(p){return`<div class="pr"><div class="pe">${p.e}</div><div class="pi"><div class="pn">${p.ar}</div><div class="pbd"><span class="b ${FB[p.ff]}">${FLBL[p.ff]}</span><span class="b bgr">${p.fd}</span></div></div></div>`;}
 
 // ── GARDEN ────────────────────────────────────────────────────────────
-let selCat='all';
 function renderGarden(){
+  const g=getGarden();
   const q=(document.getElementById('srchQ')?.value||'').trim().toLowerCase();
-  // Merge predefined + custom plants
-  const custom=JSON.parse(localStorage.getItem('customPlants')||'[]');
-  const allP=[...P,...custom];
-  if(!document.getElementById('catChips').innerHTML){
-    const cats=['all',...Object.keys(CLBL),'other'];
-    document.getElementById('catChips').innerHTML=cats.map((c,i)=>
-      `<button class="chip${c===selCat?' on':''}" onclick="setCat('${c}')">${c==='all'?'🌿 الكل':c==='other'?'⭐ مضافة':CLBL[c]}</button>`).join('');
+  const rows=g.filter(p=>!q||p.ar.includes(q)||p.en.toLowerCase().includes(q));
+  if(!rows.length&&!g.length){
+    document.getElementById('gardenBody').innerHTML=`<div class="empty"><div class="ei">🌱</div><p>حديقتك فارغة حالياً<br>صوّر نبتة من تبويب <strong>تعرف</strong><br>وأضفها هنا بضغطة واحدة</p></div>`;return;
   }
-  const rows=allP.filter(p=>(selCat==='all'||p.c===selCat)&&(!q||p.ar.includes(q)||p.en.toLowerCase().includes(q.toLowerCase())));
   if(!rows.length){document.getElementById('gardenBody').innerHTML='<div class="empty"><p>لا توجد نتائج</p></div>';return;}
   document.getElementById('gardenBody').innerHTML=
     `<div style="font-size:11px;color:var(--txt3);margin-bottom:8px">${rows.length} نبات</div>`+
-    `<div class="card">${rows.map(p=>`<div class="pr"><div class="pe">${p.e}</div><div class="pi">
-      <div class="pn">${p.ar}${p.custom?'<span class="b bg" style="margin-right:6px;font-size:9px">جديد ⭐</span>':''}</div>
-      <div class="ps" style="font-style:italic">${p.en}</div>
-      <div class="pbd"><span class="b ${WB[p.wf]}">${WLBL[p.wf]}</span><span class="b ${FB[p.ff]}">${FLBL[p.ff]}</span></div>
-      <div class="pnt">${p.nt}</div></div></div>`).join('')}</div>`;
+    rows.map(p=>`
+      <div class="g-card">
+        <div class="g-card-body">
+          <div class="pe">${p.e}</div>
+          <div class="pi">
+            <div class="pn">${p.ar}</div>
+            <div class="ps" style="font-style:italic">${p.en}</div>
+            <div class="pbd">
+              <span class="b ${WB[p.wf]}">${WLBL[p.wf]}</span>
+              <span class="b ${FB[p.ff]}">${FLBL[p.ff]}</span>
+            </div>
+            ${p.sun?`<div style="margin-top:4px"><span class="info-pill">${SUN_LBL[p.sun]||p.sun}</span></div>`:''}
+            ${p.potInfo?`<div style="margin-top:3px;font-size:11px;color:var(--txt3)">📦 ${p.potInfo}</div>`:''}
+            <div class="pnt">${p.nt||''}</div>
+          </div>
+        </div>
+        <div class="g-card-foot">
+          <button class="g-del-btn" onclick="deletePlant('${p.id}')">🗑️ حذف</button>
+          <span style="font-size:11px;color:var(--txt3);align-self:center;margin-right:auto">أُضيف: ${p.addedAt||'–'}</span>
+        </div>
+      </div>`).join('');
 }
-function setCat(c){
-  selCat=c;
-  document.querySelectorAll('#catChips .chip').forEach((el,i)=>{
-    const cats=['all',...Object.keys(CLBL)];
-    el.classList.toggle('on',cats[i]===c);
-  });
+function deletePlant(id){
+  if(!confirm('حذف هذا النبات من حديقتك؟'))return;
+  const g=getGarden().filter(p=>p.id!==id);
+  saveGarden(g);
   renderGarden();
+  renderToday();
+  toast('🗑️ تم الحذف');
+}
+
+// ── CAMERA / GALLERY ──────────────────────────────────────────────────
+function pickPhoto(){openCamera();}
+function openCamera(){
+  if(window.Android){window.Android.openCamera();}
+  else{const fi=document.getElementById('fi-cam');fi.value='';fi.click();}
+}
+function openGallery(){
+  if(window.Android){window.Android.openGallery();}
+  else{const fi=document.getElementById('fi-gal');fi.value='';fi.click();}
 }
 
 // ── IDENTIFY ──────────────────────────────────────────────────────────
-// Open device camera directly
-function openCamera(){
-  const fi=document.getElementById('fi');
-  fi.setAttribute('capture','environment');
-  fi.value=''; fi.click();
-}
-// Open gallery/files picker (no forced camera)
-function openGallery(){
-  const fi=document.getElementById('fi');
-  fi.removeAttribute('capture');
-  fi.value=''; fi.click();
-}
-// Add identified plant to custom garden list
-function addToGarden(ar,sci,en){
-  const custom=JSON.parse(localStorage.getItem('customPlants')||'[]');
-  if(custom.some(p=>p.sci===sci)){toast('موجودة مسبقاً في حديقتك ✅');return;}
-  custom.push({
-    id:'c_'+Date.now(),c:'other',ar,en:en||sci,sci,
-    wf:'alt',ff:'mo',fd:'شهرياً',
-    nt:'نبات مضاف من التعرف',
-    k:[sci.toLowerCase().split(' ')[0]],
-    e:'🌿',custom:true,
-    addedAt:new Date().toISOString().split('T')[0]
-  });
-  localStorage.setItem('customPlants',JSON.stringify(custom));
-  toast('✅ أُضيفت '+ar+' إلى حديقتي');
-  document.querySelectorAll('.add-btn').forEach(b=>{
-    b.innerHTML='✅ تمت الإضافة';
-    b.disabled=true;
-    b.style.cssText='margin-top:10px;padding:10px;font-size:13px;width:100%;background:var(--gbg);color:var(--g2);border:2px solid var(--g2);border-radius:10px;font-family:inherit;cursor:default';
-  });
-  renderGarden();
-}
-
-let b64=null;
+let b64=null,pendingResult=null;
 function onPhoto(inp){
-  const f=inp.files[0]; if(!f)return;
+  const f=inp.files[0];if(!f)return;
   const r=new FileReader();
   r.onload=e=>{
     b64=e.target.result.split(',')[1];
     const img=document.getElementById('camImg');
-    img.src=e.target.result; img.style.display='block';
+    img.src=e.target.result;img.style.display='block';
     document.getElementById('camPh').style.display='none';
-    const btn=document.getElementById('idBtn');
-    btn.disabled=false; btn.style.opacity='1';
     document.getElementById('idResult').innerHTML='';
-    document.getElementById('noKeyHint').style.display=
-      localStorage.getItem('pkey')?'none':'block';
+    const key=localStorage.getItem('pkey');
+    if(!key){document.getElementById('noKeyHint').style.display='block';return;}
+    document.getElementById('noKeyHint').style.display='none';
+    doIdentify(); // auto-identify
   };
   r.readAsDataURL(f);
 }
@@ -527,72 +491,119 @@ async function doIdentify(){
   const key=localStorage.getItem('pkey');
   if(!key){showScr('Settings');toast('أدخل مفتاح API في الإعدادات');return;}
   if(!b64){toast('التقط صورة أولاً');return;}
-  document.getElementById('idBtn').disabled=true;
-  document.getElementById('idResult').innerHTML=`<div class="loading"><div class="spin"></div><p style="margin-top:10px">جاري التعرف...</p></div>`;
+  document.getElementById('idResult').innerHTML=`<div class="loading"><div class="spin"></div><p style="margin-top:10px">جاري التعرف على النبتة والكشف عن الأمراض...</p></div>`;
   try{
-    const res=await fetch('https://api.plant.id/v2/identify',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({images:['data:image/jpeg;base64,'+b64],api_key:key,plant_details:['common_names','wiki_description','taxonomy']})
-    });
-    if(!res.ok)throw new Error('خطأ في الاتصال: '+res.status);
+    // Run both APIs in parallel
+    const [res,hRes]=await Promise.all([
+      fetch('https://api.plant.id/v2/identify',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({images:['data:image/jpeg;base64,'+b64],api_key:key,
+          plant_details:['common_names','wiki_description','taxonomy']})
+      }),
+      fetch('https://api.plant.id/v2/health_assessment',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({images:['data:image/jpeg;base64,'+b64],api_key:key})
+      })
+    ]);
+    if(!res.ok)throw new Error('خطأ '+res.status);
     const data=await res.json();
+    const health=hRes.ok?await hRes.json():null;
     if(!data.suggestions?.length){
-      document.getElementById('idResult').innerHTML='<div class="card"><p style="text-align:center;color:var(--txt3);padding:16px">لم يتمكن من التعرف على النبتة — جرب صورة أوضح</p></div>';
+      document.getElementById('idResult').innerHTML='<div class="card"><p style="text-align:center;color:var(--txt3);padding:16px">لم يتمكن من التعرف — جرب صورة أوضح</p></div>';
       return;
     }
-    showResult(data.suggestions);
+    showResult(data.suggestions,health);
   }catch(err){
     document.getElementById('idResult').innerHTML=`<div class="card"><p style="color:var(--red);padding:8px">❌ ${err.message}</p></div>`;
-  }finally{document.getElementById('idBtn').disabled=false;}
+  }
 }
 
 function arName(sci,names){
   const l=sci.toLowerCase();
-  for(const[k,v] of Object.entries(AR)){if(l.includes(k))return v;}
-  for(const n of(names||[])){const nl=n.toLowerCase();for(const[k,v] of Object.entries(AR)){if(nl.includes(k))return v;}}
+  const AR={"lemon":"الليمون","citrus limon":"الليمون","orange":"البرتقال","citrus sinensis":"البرتقال",
+    "mint":"النعنع","mentha":"النعنع","lemon balm":"المليسة","melissa":"المليسة",
+    "gardenia":"الغاردينيا","jasmine":"الياسمين","jasminum":"الياسمين",
+    "rose":"الورد","rosa":"الورد","lavender":"اللافندر","lavandula":"اللافندر",
+    "rosemary":"إكليل الجبل","rosmarinus":"إكليل الجبل","aloe":"الألوفيرا",
+    "aloe vera":"الألوفيرا","cactus":"الصبارة","cypress":"السرو","cupressus":"السرو",
+    "sunflower":"عباد الشمس","helianthus":"عباد الشمس","pepper":"الفليفلة",
+    "capsicum":"الفليفلة","mulberry":"شجرة التوت","morus":"شجرة التوت",
+    "peach":"شجرة الخوخ","prunus persica":"شجرة الخوخ","grape":"العنب","vitis":"العنب",
+    "kumquat":"الكمكوات","fortunella":"الكمكوات","mallow":"الخبيزة","malva":"الخبيزة"};
+  for(const[k,v]of Object.entries(AR)){if(l.includes(k))return v;}
+  for(const n of(names||[])){const nl=n.toLowerCase();for(const[k,v]of Object.entries(AR)){if(nl.includes(k))return v;}}
   return names?.[0]||sci;
 }
 
-function showResult(sug){
+function showResult(sug,health){
   const top=sug[0];
   const conf=Math.round(top.probability*100);
   const sci=top.plant_name||'';
   const ar=arName(sci,top.plant_details?.common_names);
-  const wiki=(top.plant_details?.wiki_description?.value||'').substring(0,200);
-  const matches=P.filter(p=>p.k.some(k=>sci.toLowerCase().includes(k)||k.includes(sci.toLowerCase().split(' ')[0])));
-  
+  const wiki=(top.plant_details?.wiki_description?.value||'').substring(0,180);
+  const dbMatch=PLANT_DB.find(p=>p.k.some(k=>sci.toLowerCase().includes(k)||k.includes(sci.toLowerCase().split(' ')[0])));
+  const inGarden=getGarden().some(p=>p.sciName===sci);
+
   let h=`<div class="res-card">
     <div class="res-name">${ar}</div>
     <div class="res-sci">${sci}</div>
     <div style="font-size:12px;color:var(--txt2)">دقة التعريف: ${conf}%</div>
     <div class="conf-bar"><div class="conf-fill" style="width:${conf}%"></div></div>`;
-  
-  if(matches.length){
-    const m=matches[0];
-    h+=`<div class="res-tag res-in">✅ موجودة في حديقتك: <strong>${matches.map(x=>x.ar).join('، ')}</strong></div>
-    <div style="margin-top:12px;background:var(--gbg);border-radius:10px;padding:10px 12px">
-      <div style="font-size:12px;font-weight:700;color:var(--g1);margin-bottom:6px">📋 بروتوكول العناية</div>
-      <div style="font-size:12px;color:var(--txt2);line-height:1.8">
-        🌊 <span class="b ${WB[m.wf]}">${WLBL[m.wf]}</span><br>
-        🌱 <span class="b ${FB[m.ff]}">${FLBL[m.ff]}</span> — ${m.fd}<br>
-        📝 ${m.nt}
+
+  // Disease detection
+  const diseases=health?.health_assessment?.diseases?.filter(d=>d.probability>0.15)||[];
+  if(diseases.length){
+    const topDis=diseases[0];
+    const disPct=Math.round(topDis.probability*100);
+    h+=`<div class="res-tag res-dis">🔬 <div><strong>كُشف عن إصابة محتملة (${disPct}%):</strong><br>${topDis.name}<br>
+      <span style="font-size:11px">${topDis.disease_details?.description||''}</span></div></div>`;
+    if(topDis.disease_details?.treatment){
+      const t=topDis.disease_details.treatment;
+      const tips=[t.biological,t.chemical,t.prevention].filter(Boolean).join(' • ').substring(0,200);
+      if(tips)h+=`<div class="nbox" style="margin-top:8px">💊 <strong>العلاج:</strong> ${tips}</div>`;
+    }
+  }else if(health){
+    h+=`<div class="res-tag res-in">✅ النبتة تبدو بصحة جيدة</div>`;
+  }
+
+  // Garden match info
+  if(dbMatch){
+    h+=`<div style="margin-top:12px;background:var(--gbg);border-radius:10px;padding:10px 12px">
+      <div style="font-size:12px;font-weight:700;color:var(--g1);margin-bottom:6px">📋 بروتوكول العناية المقترح</div>
+      <div style="font-size:12px;color:var(--txt2);line-height:1.9">
+        🌊 <span class="b ${WB[dbMatch.wf]}">${WLBL[dbMatch.wf]}</span><br>
+        🌱 <span class="b ${FB[dbMatch.ff]}">${FLBL[dbMatch.ff]}</span> — ${dbMatch.fd}<br>
+        ${SUN_LBL[dbMatch.sun]||''} &nbsp; | &nbsp; 🌿 ${ROOT_LBL[dbMatch.root]||''}<br>
+        📝 ${dbMatch.nt}
       </div>
     </div>`;
-  }else{
-    const _alreadyCustom=JSON.parse(localStorage.getItem('customPlants')||'[]').some(p=>p.sci===sci);
-    h+=`<div class="res-tag res-out">🔍 غير مدرجة في قائمة حديقتك الحالية</div>`;
-    if(!_alreadyCustom){
-      const _en=(top.plant_details?.common_names?.[0]||sci).replace(/'/g,"\'");
-      h+=`<button class="btn btn-p add-btn" style="margin-top:10px;padding:10px;font-size:13px;width:100%"
-        onclick="addToGarden('${ar.replace(/'/g,"\'")}','${sci.replace(/'/g,"\'")}','${_en}')">
-        ➕ أضف إلى حديقتي</button>`;
-    }else{
-      h+=`<div class="res-tag res-in" style="margin-top:8px">✅ تمت إضافتها لحديقتك مسبقاً</div>`;
-    }
+    // Sun/location recommendation
+    h+=`<div class="nbox" style="margin-top:8px">
+      📍 <strong>أفضل مكان:</strong> ${
+        dbMatch.sun==='full'?'شمس مباشرة كاملة — 6 ساعات فأكثر':
+        dbMatch.sun==='partial'?'شمس جزئية — 3 إلى 6 ساعات':
+        'ظل — تجنب الشمس المباشرة'
+      }<br>
+      🪴 <strong>الحوض المناسب:</strong> ${
+        dbMatch.root==='shallow'?'عمق 20سم يكفي — حوض صغير مناسب':
+        dbMatch.root==='medium'?'عمق 35–50سم — حوض متوسط':
+        'عمق 60سم+ — يحتاج حوض كبير أو زراعة أرضية'
+      }
+    </div>`;
   }
+
   if(wiki)h+=`<div style="margin-top:10px;font-size:12px;color:var(--txt2);line-height:1.6">${wiki}...</div>`;
+
+  // Add to garden button
+  if(inGarden){
+    h+=`<div class="res-tag res-in" style="margin-top:10px">✅ موجودة مسبقاً في حديقتك</div>`;
+  }else{
+    h+=`<button class="btn btn-p" id="addBtn" style="margin-top:12px;width:100%"
+      onclick="showAddModal('${ar.replace(/'/g,"\\'")}','${sci.replace(/'/g,"\\'")}','${(dbMatch?.en||sci).replace(/'/g,"\\'")}')">
+      ➕ أضف إلى حديقتي</button>`;
+  }
   h+='</div>';
-  
+
   if(sug.length>1){
     h+=`<div class="card"><div class="card-hd">احتمالات أخرى</div>`;
     sug.slice(1,4).forEach(s=>{
@@ -606,7 +617,106 @@ function showResult(sug){
     });
     h+='</div>';
   }
+  pendingResult={ar,sci,en:dbMatch?.en||sci,dbMatch};
   document.getElementById('idResult').innerHTML=h;
+}
+
+// ── POT MODAL ─────────────────────────────────────────────────────────
+let potType='pot',potShape='round';
+function showAddModal(ar,sci,en){
+  pendingResult={...(pendingResult||{}),ar,sci,en};
+  document.getElementById('modalBg').style.display='flex';
+}
+function closeModal(e){if(!e||e.target===document.getElementById('modalBg'))document.getElementById('modalBg').style.display='none';}
+function setSeg(t){
+  potType=t;
+  document.getElementById('seg-pot').classList.toggle('on',t==='pot');
+  document.getElementById('seg-ground').classList.toggle('on',t==='ground');
+  document.getElementById('pot-fields').style.display=t==='pot'?'block':'none';
+  document.getElementById('ground-fields').style.display=t==='ground'?'block':'none';
+}
+function setShape(s){
+  potShape=s;
+  document.getElementById('sh-round').classList.toggle('on',s==='round');
+  document.getElementById('sh-rect').classList.toggle('on',s==='rect');
+  document.getElementById('round-fields').style.display=s==='round'?'block':'none';
+  document.getElementById('rect-fields').style.display=s==='rect'?'block':'none';
+}
+function confirmAdd(){
+  if(!pendingResult)return;
+  const{ar,sci,en,dbMatch}=pendingResult;
+  let potInfo='',potVol=0;
+  if(potType==='pot'){
+    if(potShape==='round'){
+      const d=parseFloat(document.getElementById('pot-diam').value)||0;
+      const h=parseFloat(document.getElementById('pot-dep1').value)||0;
+      if(d&&h){potVol=Math.PI*(d/2)**2*h/1000;potInfo=`حوض دائري ⌀${d}×${h}سم (${potVol.toFixed(1)}ل)`;}
+      else{potInfo='حوض دائري';}
+    }else{
+      const l=parseFloat(document.getElementById('pot-len').value)||0;
+      const w=parseFloat(document.getElementById('pot-wid').value)||0;
+      const h=parseFloat(document.getElementById('pot-dep2').value)||0;
+      if(l&&w&&h){potVol=l*w*h/1000;potInfo=`حوض ${l}×${w}×${h}سم (${potVol.toFixed(1)}ل)`;}
+      else{potInfo='حوض مستطيل';}
+    }
+  }else{potInfo='زراعة أرضية';}
+
+  // Adjust watering if pot is small
+  let wf=dbMatch?.wf||'alt';
+  if(potType==='pot'&&potVol>0&&potVol<5&&wf==='alt')wf='daily';
+
+  const newPlant={
+    id:'g_'+Date.now(),
+    ar,en,sciName:sci,
+    c:dbMatch?.c||'custom',
+    e:dbMatch?.e||'🌿',
+    wf,ff:dbMatch?.ff||'mo',fd:dbMatch?.fd||'شهرياً',
+    nt:dbMatch?.nt||'',
+    sun:dbMatch?.sun||null,
+    root:dbMatch?.root||null,
+    potInfo,
+    addedAt:new Date().toISOString().split('T')[0],
+  };
+  const g=getGarden();g.push(newPlant);saveGarden(g);
+  document.getElementById('modalBg').style.display='none';
+  toast(`✅ أُضيفت ${ar} إلى حديقتي`);
+  const btn=document.getElementById('addBtn');
+  if(btn){btn.textContent='✅ تمت الإضافة';btn.disabled=true;btn.style.background='var(--gbg)';btn.style.color='var(--g2)';}
+  renderToday();
+}
+
+// ── WEATHER ───────────────────────────────────────────────────────────
+let userLat=null,userLon=null;
+function requestLocation(){
+  if(!navigator.geolocation){toast('الجهاز لا يدعم تحديد الموقع');return;}
+  document.getElementById('locStatus').textContent='📍 جاري تحديد موقعك...';
+  navigator.geolocation.getCurrentPosition(pos=>{
+    userLat=pos.coords.latitude;userLon=pos.coords.longitude;
+    localStorage.setItem('loc',JSON.stringify({lat:userLat,lon:userLon}));
+    document.getElementById('locStatus').textContent=`✅ الموقع: ${userLat.toFixed(3)}, ${userLon.toFixed(3)}`;
+    fetchWeather();
+  },err=>{
+    document.getElementById('locStatus').textContent='❌ لم يتم تحديد الموقع — تحقق من الصلاحيات';
+    toast('تعذّر الوصول للموقع');
+  },{timeout:10000});
+}
+async function fetchWeather(){
+  const loc=JSON.parse(localStorage.getItem('loc')||'null');
+  if(!loc)return;
+  try{
+    const url=`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current=temperature_2m,weather_code,relative_humidity_2m,precipitation&timezone=auto`;
+    const res=await fetch(url);
+    const d=await res.json();
+    const temp=Math.round(d.current.temperature_2m);
+    const code=d.current.weather_code;
+    const humid=d.current.relative_humidity_2m;
+    const rain=d.current.precipitation>0;
+    const icon=WCODE[code]||WCODE[Object.keys(WCODE).sort((a,b)=>Math.abs(code-a)-Math.abs(code-b))[0]]||'🌡️';
+    document.getElementById('hdrBadge').textContent=`${icon} ${temp}°م`;
+    localStorage.setItem('weather',JSON.stringify({temp,icon,humid,rain,ts:Date.now()}));
+    // Watering tip if rain
+    if(rain)toast('🌧️ مطر اليوم — قلل الري');
+  }catch(e){console.warn('weather fail',e);}
 }
 
 // ── SETTINGS ─────────────────────────────────────────────────────────
@@ -614,28 +724,39 @@ function saveKey(){
   const v=document.getElementById('apiKey').value.trim();
   if(!v){toast('أدخل المفتاح');return;}
   localStorage.setItem('pkey',v);
+  updateKeyStatus(true);
   toast('✓ تم حفظ مفتاح API');
+}
+function updateKeyStatus(ok){
+  const el=document.getElementById('keyStatus');
+  if(!el)return;
+  el.innerHTML=ok?
+    '<div class="key-status key-ok">✅ مفتاح API محفوظ وجاهز</div>':
+    '<div class="key-status key-no">❌ لم يُحفظ مفتاح API بعد</div>';
 }
 function loadSettings(){
   const k=localStorage.getItem('pkey');
   if(k)document.getElementById('apiKey').value=k;
+  updateKeyStatus(!!k);
+  const loc=JSON.parse(localStorage.getItem('loc')||'null');
+  if(loc)document.getElementById('locStatus').textContent=`✅ الموقع محفوظ: ${loc.lat.toFixed(3)}, ${loc.lon.toFixed(3)}`;
 }
 
 // ── TOAST ─────────────────────────────────────────────────────────────
-function toast(m){
-  const t=document.getElementById('toast');
-  t.textContent=m;t.classList.add('on');
-  setTimeout(()=>t.classList.remove('on'),2500);
-}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2500);}
 
 // ── SERVICE WORKER ────────────────────────────────────────────────────
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('./sw.js').catch(()=>{});
-}
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 
-// ── INIT ──────────────────────────────────────────────────────────────
+// ── INIT ─────────────────────────────────────────────────────────────
 renderToday();
 loadSettings();
+// Load cached weather
+const cachedW=JSON.parse(localStorage.getItem('weather')||'null');
+if(cachedW&&Date.now()-cachedW.ts<3600000)document.getElementById('hdrBadge').textContent=`${cachedW.icon} ${cachedW.temp}°م`;
+// Auto-fetch weather if location saved
+const savedLoc=JSON.parse(localStorage.getItem('loc')||'null');
+if(savedLoc){userLat=savedLoc.lat;userLon=savedLoc.lon;fetchWeather();}
 </script>
 </body>
 </html>
