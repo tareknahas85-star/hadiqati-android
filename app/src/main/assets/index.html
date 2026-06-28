@@ -7,6 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#2E7D32">
 <link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,1,0">
 <title>حديقتي 🌿</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -167,6 +168,8 @@ input:focus{outline:none;border-color:var(--g2);box-shadow:0 0 0 3px rgba(46,125
 .g-del-btn{background:none;border:none;color:var(--red);font-size:12px;font-weight:700;
   cursor:pointer;padding:4px 8px;border-radius:8px;font-family:inherit}
 .g-del-btn:hover{background:var(--rbg)}
+.msym{font-family:'Material Symbols Rounded';font-size:22px;line-height:1;
+  font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;}
 @media(prefers-color-scheme:dark){
   :root{--card:#1E1E1E;--bg:#121212;--border:#333;--border2:#2A2A2A;--txt:#E0E0E0;--txt2:#AAA;--txt3:#666}
   .bnav{background:#1A1A1A;border-top:1px solid var(--border)}
@@ -249,6 +252,22 @@ input:focus{outline:none;border-color:var(--g2);box-shadow:0 0 0 3px rgba(46,125
     <div id="locStatus" style="margin-top:8px;font-size:12px;color:var(--txt3)"></div>
   </div>
   <div class="card">
+    <div class="card-hd">☁️ Google والنسخ الاحتياطي</div>
+    <p style="font-size:12px;color:var(--txt2);line-height:1.7;margin-bottom:12px">
+      سجّل دخول بحساب Google لحفظ حديقتك على Drive واستعادتها في أي وقت.
+    </p>
+    <div id="googleStatus"></div>
+    <div class="btns" style="margin-top:12px">
+      <button class="btn btn-s" onclick="exportBackup()">
+        <span class="msym" style="font-size:18px">upload</span> تصدير
+      </button>
+      <button class="btn btn-s" onclick="importBackup()">
+        <span class="msym" style="font-size:18px">download</span> استعادة
+      </button>
+    </div>
+    <div class="hint">النسخ الاحتياطي يحفظ: النباتات، بروتوكولات العناية، الإعدادات</div>
+  </div>
+  <div class="card">
     <div class="card-hd">ℹ️ معلومات</div>
     <p style="font-size:12px;color:var(--txt2);line-height:1.7">
       حديقة السطح — بروتوكول صيفي<br>
@@ -299,10 +318,10 @@ input:focus{outline:none;border-color:var(--g2);box-shadow:0 0 0 3px rgba(46,125
 </div>
 
 <nav class="bnav">
-  <button class="nb on" id="nToday"    onclick="showScr('Today')"><span class="ni">📅</span>اليوم</button>
-  <button class="nb"    id="nIdentify" onclick="showScr('Identify')"><span class="ni">📷</span>تعرف</button>
-  <button class="nb"    id="nGarden"   onclick="showScr('Garden')"><span class="ni">🌿</span>حديقتي</button>
-  <button class="nb"    id="nSettings" onclick="showScr('Settings')"><span class="ni">⚙️</span>إعدادات</button>
+  <button class="nb on" id="nToday"    onclick="showScr('Today')"><span class="msym ni">calendar_today</span>اليوم</button>
+  <button class="nb"    id="nIdentify" onclick="showScr('Identify')"><span class="msym ni">camera_alt</span>تعرف</button>
+  <button class="nb"    id="nGarden"   onclick="showScr('Garden')"><span class="msym ni">eco</span>حديقتي</button>
+  <button class="nb"    id="nSettings" onclick="showScr('Settings')"><span class="msym ni">settings</span>إعدادات</button>
 </nav>
 <div class="toast" id="toast"></div>
 
@@ -740,12 +759,92 @@ function loadSettings(){
   updateKeyStatus(!!k);
   const loc=JSON.parse(localStorage.getItem('loc')||'null');
   if(loc)document.getElementById('locStatus').textContent=`✅ الموقع محفوظ: ${loc.lat.toFixed(3)}, ${loc.lon.toFixed(3)}`;
+  updateGoogleUI();
 }
 
 // ── TOAST ─────────────────────────────────────────────────────────────
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2500);}
 
 // ── SERVICE WORKER ────────────────────────────────────────────────────
+// ── onNativePhoto: called by Android after camera/gallery ─────────────
+// This replaces the file input approach which doesn't work in Android WebView
+function onNativePhoto(dataUrl){
+  b64=dataUrl.split(',')[1];
+  const img=document.getElementById('camImg');
+  img.src=dataUrl; img.style.display='block';
+  document.getElementById('camPh').style.display='none';
+  document.getElementById('idResult').innerHTML='';
+  const key=localStorage.getItem('pkey');
+  if(!key){document.getElementById('noKeyHint').style.display='block';return;}
+  document.getElementById('noKeyHint').style.display='none';
+  doIdentify();
+}
+
+// ── Google Sign-In callbacks (called from Android via evaluateJavascript) ─
+function onGoogleSignIn(email,name){
+  localStorage.setItem('gEmail',email);
+  localStorage.setItem('gName',name);
+  updateGoogleUI();
+}
+function onGoogleSignOut(){
+  localStorage.removeItem('gEmail');
+  localStorage.removeItem('gName');
+  updateGoogleUI();
+}
+function updateGoogleUI(){
+  const el=document.getElementById('googleStatus');
+  if(!el)return;
+  const email=localStorage.getItem('gEmail');
+  const name=localStorage.getItem('gName');
+  if(email){
+    el.innerHTML=`<div class="key-status key-ok">
+      <span class="msym" style="font-size:16px">account_circle</span>
+      ${name||email}</div>
+      <button class="save-btn" style="background:#c62828;margin-top:8px;font-size:12px"
+        onclick="if(window.Android)Android.signOut()">تسجيل خروج</button>`;
+  }else{
+    el.innerHTML=`<button class="save-btn" style="background:#4285F4;display:flex;align-items:center;gap:8px"
+      onclick="if(window.Android){Android.signInWithGoogle();}else{toast('متاح على التطبيق فقط');}">      <span class="msym" style="font-size:18px;color:#fff">login</span>تسجيل الدخول بـ Google</button>`;
+  }
+}
+
+// ── Local Backup / Restore ─────────────────────────────────────────────
+function exportBackup(){
+  const bk={
+    v:1,
+    date:new Date().toISOString(),
+    myGarden:JSON.parse(localStorage.getItem('myGarden')||'[]'),
+    pkey:localStorage.getItem('pkey')||'',
+    loc:JSON.parse(localStorage.getItem('loc')||'null'),
+  };
+  const blob=new Blob([JSON.stringify(bk,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='hadiqati-backup-'+new Date().toLocaleDateString('ar').replace(/\//g,'-')+'.json';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  toast('✅ تم تصدير نسخة احتياطية');
+}
+function importBackup(){
+  const input=document.createElement('input');
+  input.type='file'; input.accept='.json';
+  input.onchange=async e=>{
+    const file=e.target.files[0]; if(!file)return;
+    try{
+      const text=await file.text();
+      const bk=JSON.parse(text);
+      if(!bk.v){throw new Error('ملف غير صالح');}
+      if(bk.myGarden)localStorage.setItem('myGarden',JSON.stringify(bk.myGarden));
+      if(bk.pkey)localStorage.setItem('pkey',bk.pkey);
+      if(bk.loc)localStorage.setItem('loc',JSON.stringify(bk.loc));
+      renderToday(); renderGarden(); loadSettings();
+      toast('✅ تمت استعادة البيانات بنجاح ('+bk.myGarden?.length+' نبات)');
+    }catch(err){toast('❌ ملف غير صالح: '+err.message);}
+  };
+  input.click();
+}
+
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 
 // ── INIT ─────────────────────────────────────────────────────────────
