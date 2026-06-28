@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="حديقتي">
+<meta name="theme-color" content="#2E7D32">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>حديقتي 🌿</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --g1:#1B5E20;--g2:#2E7D32;--g3:#388E3C;--g4:#66BB6A;--gbg:#E8F5E9;--glt:#F1F8E9;
+  --red:#C62828;--rbg:#FFEBEE;
+  --ora:#E65100;--obg:#FFF3E0;
+  --yel:#F9A825;--ybg:#FFFDE7;
+  --blu:#1565C0;--bbg:#E3F2FD;
+  --pur:#6A1B9A;--pbg:#F3E5F5;
+  --teal:#00695C;--tbg:#E0F2F1;
+  --card:#FFF;--bg:#F1F8E9;
+  --border:#E0E0E0;--border2:#EEEEEE;
+  --txt:#212121;--txt2:#555;--txt3:#999;
+  --sh:0 2px 12px rgba(0,0,0,.09);--sh2:0 4px 20px rgba(0,0,0,.13);
+  --r:14px;--r2:10px;
+}
+body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:var(--txt);
+  direction:rtl;max-width:430px;margin:0 auto;min-height:100vh;padding-bottom:72px;
+  -webkit-font-smoothing:antialiased}
+/* ── HEADER ── */
+.hdr{background:var(--g2);color:#fff;padding:16px 16px 12px;position:sticky;top:0;z-index:100;
+  display:flex;justify-content:space-between;align-items:flex-end;
+  box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.hdr-title{font-size:19px;font-weight:700;letter-spacing:.3px}
+.hdr-date{font-size:11px;opacity:.8;margin-top:2px}
+.hdr-badge{background:rgba(255,255,255,.2);border-radius:20px;padding:5px 10px;font-size:12px;font-weight:600}
+/* ── BOTTOM NAV ── */
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;
+  background:#fff;border-top:1px solid var(--border2);display:flex;z-index:200;
+  box-shadow:0 -2px 12px rgba(0,0,0,.08)}
+.nb{flex:1;border:none;background:none;padding:10px 4px 8px;display:flex;flex-direction:column;
+  align-items:center;gap:3px;cursor:pointer;font-family:inherit;font-size:10px;
+  color:var(--txt3);transition:color .15s}
+.nb .ni{font-size:22px;line-height:1}
+.nb.on{color:var(--g2)}
+/* ── SCREENS ── */
+.scr{display:none;padding:12px;animation:fadeIn .2s ease}
+.scr.on{display:block}
+@keyframes fadeIn{from{opacity:.4;transform:translateY(4px)}to{opacity:1;transform:none}}
+/* ── CARDS ── */
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:14px;margin-bottom:12px}
+.card-hd{font-size:14px;font-weight:700;color:var(--g1);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+/* ── BADGES ── */
+.b{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap}
+.br{background:var(--rbg);color:var(--red)}
+.bo{background:var(--obg);color:var(--ora)}
+.by{background:var(--ybg);color:#E65100}
+.bg{background:var(--gbg);color:var(--g2)}
+.bb{background:var(--bbg);color:var(--blu)}
+.bp{background:var(--pbg);color:var(--pur)}
+.bt{background:var(--tbg);color:var(--teal)}
+.bgr{background:#F5F5F5;color:#666}
+/* ── PLANT ROW ── */
+.pr{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border2)}
+.pr:last-child{border-bottom:none}
+.pe{font-size:26px;width:36px;text-align:center;flex-shrink:0;line-height:1.2}
+.pi{flex:1;min-width:0}
+.pn{font-size:13px;font-weight:700;color:var(--txt)}
+.ps{font-size:11px;color:var(--txt3);margin-top:1px}
+.pbd{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.pnt{font-size:11px;color:var(--txt3);margin-top:3px;line-height:1.5}
+/* ── SECTION TITLES ── */
+.st{font-size:13px;font-weight:700;color:var(--g1);margin:16px 0 8px;
+  display:flex;align-items:center;gap:6px}
+.st-cnt{background:var(--g2);color:#fff;border-radius:10px;padding:1px 7px;font-size:11px}
+/* ── TODAY HEADER ── */
+.th{background:linear-gradient(135deg,var(--g2),var(--g3));color:#fff;
+  border-radius:var(--r);padding:14px;margin-bottom:14px;text-align:center;
+  box-shadow:var(--sh2)}
+.th-day{font-size:24px;font-weight:800;letter-spacing:.5px}
+.th-date{font-size:12px;opacity:.85;margin-top:2px}
+.th-stat{margin-top:10px;display:flex;justify-content:center;gap:16px}
+.th-item{text-align:center}
+.th-num{font-size:28px;font-weight:800;line-height:1}
+.th-lbl{font-size:10px;opacity:.8;margin-top:1px}
+/* ── NOTE BOX ── */
+.nbox{background:#FFFDE7;border-radius:10px;padding:10px 12px;font-size:12px;
+  color:#5D4037;border-right:3px solid #FBC02D;margin-bottom:8px;line-height:1.5}
+/* ── CALENDAR CARD ── */
+.cal-card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);
+  padding:14px;margin-bottom:12px;border-right:4px solid var(--g2)}
+.cal-row{display:flex;align-items:center;gap:10px;padding:8px 0;
+  border-bottom:1px solid var(--border2);font-size:13px}
+.cal-row:last-child{border-bottom:none}
+.cal-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.cal-name{flex:1;font-weight:600}
+.cal-sub{font-size:11px;color:var(--txt3)}
+/* ── CAMERA SCREEN ── */
+.cam-wrap{background:#111;border-radius:var(--r);aspect-ratio:4/3;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+  margin-bottom:12px;position:relative;box-shadow:var(--sh2)}
+.cam-wrap img{width:100%;height:100%;object-fit:cover;display:none;border-radius:var(--r)}
+.cam-ph{color:#fff;opacity:.35;text-align:center}
+.cam-ph .ci{font-size:52px;display:block;margin-bottom:6px}
+.cam-ph p{font-size:12px}
+/* ── BUTTONS ── */
+.btns{display:flex;gap:10px;margin-bottom:14px}
+.btn{flex:1;padding:13px;border:none;border-radius:var(--r2);font-size:14px;font-weight:700;
+  cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;
+  gap:7px;transition:transform .1s,opacity .1s;box-shadow:var(--sh)}
+.btn:active{transform:scale(.97);opacity:.9}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-p{background:var(--g2);color:#fff}
+.btn-s{background:var(--gbg);color:var(--g2);border:2px solid var(--g2)}
+/* ── RESULT ── */
+.res-card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh2);
+  padding:16px;margin-bottom:12px;border-right:4px solid var(--g2)}
+.res-name{font-size:20px;font-weight:800;color:var(--g1);margin-bottom:2px}
+.res-sci{font-size:12px;color:var(--txt3);font-style:italic;margin-bottom:10px}
+.conf-bar{height:7px;background:var(--gbg);border-radius:4px;overflow:hidden;margin:4px 0 2px}
+.conf-fill{height:100%;background:var(--g4);border-radius:4px;transition:width .6s ease}
+.res-tag{border-radius:10px;padding:9px 12px;font-size:12px;margin-top:8px;
+  display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+.res-in{background:var(--gbg);color:var(--g1)}
+.res-out{background:var(--obg);color:var(--ora)}
+/* ── SPINNER ── */
+.spin{border:3px solid var(--border);border-top:3px solid var(--g2);
+  border-radius:50%;width:32px;height:32px;animation:sp .7s linear infinite;margin:0 auto}
+@keyframes sp{to{transform:rotate(360deg)}}
+.loading{text-align:center;padding:24px;color:var(--txt2);font-size:13px}
+/* ── INPUTS ── */
+input[type=text],input[type=password]{
+  width:100%;padding:11px 12px;border:1.5px solid var(--border);border-radius:var(--r2);
+  font-size:14px;font-family:inherit;background:var(--card);color:var(--txt);
+  margin-top:6px;transition:border-color .2s}
+input:focus{outline:none;border-color:var(--g2);box-shadow:0 0 0 3px rgba(46,125,50,.12)}
+.lbl{font-size:12px;color:var(--txt2);font-weight:700;display:block;margin-top:14px}
+.hint{font-size:11px;color:var(--txt3);margin-top:4px;line-height:1.5}
+.save-btn{background:var(--g2);color:#fff;border:none;border-radius:var(--r2);
+  padding:11px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;
+  margin-top:10px;box-shadow:var(--sh)}
+/* ── SEARCH & CHIPS ── */
+.srch{position:relative;margin-bottom:10px}
+.srch input{direction:rtl;padding-right:36px}
+.srch-ic{position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  color:var(--txt3);font-size:15px;pointer-events:none}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;padding:6px 13px;border-radius:20px;font-size:12px;font-weight:600;
+  border:1.5px solid var(--border);background:var(--card);color:var(--txt2);
+  cursor:pointer;font-family:inherit;transition:all .15s}
+.chip.on{background:var(--g2);color:#fff;border-color:var(--g2)}
+/* ── EMPTY ── */
+.empty{text-align:center;padding:32px 16px;color:var(--txt3)}
+.empty .ei{font-size:48px;margin-bottom:8px}
+/* ── TOAST ── */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+  background:#333;color:#fff;padding:10px 22px;border-radius:24px;font-size:13px;
+  z-index:999;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}
+.toast.on{opacity:1}
+/* ── NEXT CARD ── */
+.nxt-card{background:var(--card);border-radius:var(--r);padding:12px;margin-bottom:12px;
+  box-shadow:var(--sh);display:flex;align-items:center;gap:12px}
+.nxt-ic{font-size:28px;width:40px;text-align:center}
+.nxt-info{flex:1}
+.nxt-title{font-size:13px;font-weight:700;color:var(--txt)}
+.nxt-sub{font-size:11px;color:var(--txt3);margin-top:2px}
+.nxt-days{background:var(--gbg);color:var(--g2);font-size:13px;font-weight:800;
+  padding:6px 12px;border-radius:10px;text-align:center}
+/* ── DARK MODE ── */
+@media(prefers-color-scheme:dark){
+  :root{--card:#1E1E1E;--bg:#121212;--border:#333;--border2:#2A2A2A;--txt:#E0E0E0;--txt2:#AAA;--txt3:#666}
+  .bnav,.hdr{box-shadow:none}
+  .bnav{background:#1A1A1A;border-top:1px solid var(--border)}
+  .nb.on{color:var(--g4)}
+  input{background:#252525;color:#E0E0E0;border-color:#333}
+}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <div>
+    <div class="hdr-date" id="hdrDate"></div>
+    <div class="hdr-title">🌿 حديقة السطح</div>
+  </div>
+  <div class="hdr-badge" id="hdrBadge">☀️ 37°م</div>
+</header>
+
+<!-- TODAY -->
+<div id="sToday" class="scr on">
+  <div class="th">
+    <div class="th-day" id="tdDay"></div>
+    <div class="th-date" id="tdDate"></div>
+    <div class="th-stat">
+      <div class="th-item"><div class="th-num" id="statWater">–</div><div class="th-lbl">ري اليوم</div></div>
+      <div class="th-item"><div class="th-num" id="statFert">–</div><div class="th-lbl">تسميد</div></div>
+    </div>
+  </div>
+  <div id="todayBody"></div>
+</div>
+
+<!-- IDENTIFY -->
+<div id="sIdentify" class="scr">
+  <div class="cam-wrap" id="camWrap">
+    <img id="camImg" alt="">
+    <div class="cam-ph" id="camPh">
+      <span class="ci">📷</span>
+      <p>التقط صورة لنبتة<br>لمعرفة اسمها وعنايتها</p>
+    </div>
+  </div>
+  <div class="btns">
+    <button class="btn btn-p" onclick="document.getElementById('fi').click()">📷 التقاط صورة</button>
+    <button class="btn btn-s" id="idBtn" onclick="doIdentify()" disabled>🔍 تعرف عليها</button>
+  </div>
+  <input type="file" id="fi" accept="image/*" capture="environment" onchange="onPhoto(this)">
+  <div id="idResult"></div>
+  <div id="noKeyHint" style="display:none" class="nbox">
+    🔑 أدخل مفتاح Plant.id API في الإعدادات للتعرف على النباتات
+    <br><a href="#" onclick="showScr('Settings');return false" style="color:var(--g2);font-weight:700">← فتح الإعدادات</a>
+  </div>
+</div>
+
+<!-- GARDEN -->
+<div id="sGarden" class="scr">
+  <div class="srch"><span class="srch-ic">🔍</span>
+    <input type="text" id="srchQ" placeholder="ابحث باسم النبات..." oninput="renderGarden()">
+  </div>
+  <div class="chips" id="catChips"></div>
+  <div id="gardenBody"></div>
+</div>
+
+<!-- SETTINGS -->
+<div id="sSettings" class="scr">
+  <div class="card">
+    <div class="card-hd">🔑 مفتاح Plant.id API</div>
+    <span class="lbl">مفتاح API</span>
+    <input type="password" id="apiKey" placeholder="أدخل المفتاح هنا" dir="ltr">
+    <div class="hint">احصل على مفتاح مجاني من <strong>plant.id</strong> — 200 طلب تعريف مجاناً/شهر</div>
+    <button class="save-btn" onclick="saveKey()">💾 حفظ المفتاح</button>
+  </div>
+  <div class="card">
+    <div class="card-hd">📅 Google Calendar</div>
+    <div style="font-size:13px;color:var(--txt2);line-height:1.7">
+      <div>📧 <strong>tareknahas85@gmail.com</strong></div>
+      <div style="margin-top:8px;display:flex;flex-direction:column;gap:6px">
+        <div class="b bg">🌿 ري يومي إجباري — كل يوم</div>
+        <div class="b bo">🍊 ري مشروط — كل يوم (فحص التربة)</div>
+        <div class="b by">🌿 ري يوم بعد يوم — كل يومين</div>
+        <div class="b bb">💜 لافندر وإكليل — كل 3 أيام</div>
+        <div class="b bb">🌵 صباريات — كل 6 أيام</div>
+        <div class="b bo">🌱 تسميد NPK + حديد — كل 15 يوماً</div>
+        <div class="b bg">🌱 تسميد شهري — أول كل شهر</div>
+      </div>
+      <div style="margin-top:10px">
+        <a href="https://calendar.google.com" target="_blank"
+          style="background:var(--g2);color:#fff;padding:8px 16px;border-radius:10px;
+          text-decoration:none;font-size:12px;font-weight:700;display:inline-block">
+          📅 فتح Google Calendar
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd">ℹ️ معلومات</div>
+    <p style="font-size:12px;color:var(--txt2);line-height:1.7">
+      حديقة السطح — 32 نبات بروتوكول صيفي<br>
+      درجة حرارة مرجعية: 37°م – 40°م<br>
+      تاريخ بدء الجدول: 29 يونيو 2026
+    </p>
+  </div>
+</div>
+
+<nav class="bnav">
+  <button class="nb on" id="nToday" onclick="showScr('Today')"><span class="ni">📅</span>اليوم</button>
+  <button class="nb" id="nIdentify" onclick="showScr('Identify')"><span class="ni">📷</span>تعرف</button>
+  <button class="nb" id="nGarden" onclick="showScr('Garden')"><span class="ni">🌿</span>حديقتي</button>
+  <button class="nb" id="nSettings" onclick="showScr('Settings')"><span class="ni">⚙️</span>إعدادات</button>
+</nav>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── PLANT DATA ────────────────────────────────────────────────────────
+const P = [
+ {id:1, c:"fruit",ar:"شجرة ليمون صغيرة",en:"Lemon tree",wf:"daily",ff:"bw",fd:"NPK + حديد",nt:"نقص حديد — التسميد إجباري",k:["lemon","citrus limon","ليمون"],e:"🍋"},
+ {id:2, c:"fruit",ar:"شجرة ليمون كبيرة",en:"Lemon tree",wf:"daily",ff:"bw",fd:"NPK + حديد",nt:"نقص حديد — التسميد إجباري",k:["lemon","citrus limon","ليمون"],e:"🍋"},
+ {id:3, c:"fruit",ar:"شجرة برتقال",en:"Orange tree",wf:"flex",ff:"bw",fd:"NPK + حديد",nt:"راقب الأوراق — حافرات الأنفاق",k:["orange","citrus sinensis","برتقال"],e:"🍊"},
+ {id:4, c:"fruit",ar:"كمكوات",en:"Kumquat",wf:"alt",ff:"bw",fd:"NPK + حديد",nt:"حساس لركود الماء — تأكد من التصريف",k:["kumquat","fortunella","كمكوات"],e:"🟠"},
+ {id:5, c:"fruit",ar:"كلمنتينا",en:"Clementine",wf:"flex",ff:"bw",fd:"NPK + حديد",nt:"راقب الأوراق — حافرات الأنفاق",k:["clementine","كلمنتينا"],e:"🍊"},
+ {id:6, c:"fruit",ar:"نانرج",en:"Seville orange",wf:"flex",ff:"bw",fd:"NPK + حديد",nt:"راقب الأوراق — حافرات الأنفاق",k:["seville","citrus aurantium","نانرج"],e:"🍊"},
+ {id:7, c:"fruit",ar:"شجرة توت",en:"Mulberry",wf:"flex",ff:"bw",fd:"NPK + حديد",nt:"استهلاك ماء عالٍ — أوراق كبيرة",k:["mulberry","morus","توت"],e:"🫐"},
+ {id:8, c:"fruit",ar:"شجرة خوخ",en:"Peach tree",wf:"flex",ff:"bw",fd:"NPK + حديد",nt:"استهلاك ماء عالٍ — أوراق كبيرة",k:["peach","prunus persica","خوخ"],e:"🍑"},
+ {id:9, c:"fruit",ar:"دالية عنب",en:"Grapevine",wf:"flex",ff:"bw",fd:"NPK + حديد",nt:"استهلاك ماء عالٍ — أوراق كبيرة",k:["grape","vitis","عنب","vine"],e:"🍇"},
+ {id:10,c:"fruit",ar:"شجرة جوز (3 سنوات)",en:"Walnut tree",wf:"alt",ff:"mo",fd:"NPK فقط",nt:"تُعامل كزينة — لن تثمر في الحوض",k:["walnut","juglans","جوز"],e:"🌰"},
+ {id:11,c:"herb", ar:"نعنع",en:"Mint",wf:"daily",ff:"mo",fd:"NPK",nt:"رطوبة دائمة — مرتين يومياً في الحر",k:["mint","mentha","نعنع"],e:"🌿"},
+ {id:12,c:"herb", ar:"مليسة",en:"Lemon balm",wf:"daily",ff:"mo",fd:"NPK",nt:"رطوبة دائمة — مرتين يومياً في الحر",k:["lemon balm","melissa","مليسة"],e:"🌿"},
+ {id:13,c:"herb", ar:"عترة",en:"Thyme/Savory",wf:"alt",ff:"mo",fd:"جرعة خفيفة",nt:"نبتة قوية تتحمل الشمس",k:["thyme","savory","عترة","thymus"],e:"🌿"},
+ {id:14,c:"herb", ar:"إكليل الجبل (أخضر)",en:"Rosemary green",wf:"e3",ff:"ban",fd:"محظور",nt:"الري الزائد يعفن الجذور",k:["rosemary","rosmarinus","إكليل"],e:"🌿"},
+ {id:15,c:"herb", ar:"إكليل الجبل (أزرق فاتح)",en:"Rosemary blue",wf:"e3",ff:"ban",fd:"محظور",nt:"الري الزائد يعفن الجذور",k:["rosemary","rosmarinus","إكليل"],e:"🌿"},
+ {id:16,c:"herb", ar:"لافندر (النوع الأول)",en:"Lavender 1",wf:"e3",ff:"ban",fd:"محظور",nt:"التسميد والماء الزائد يقتلانها",k:["lavender","lavandula","لافندر"],e:"💜"},
+ {id:17,c:"herb", ar:"لافندر (النوع الثاني)",en:"Lavender 2",wf:"e3",ff:"ban",fd:"محظور",nt:"التسميد والماء الزائد يقتلانها",k:["lavender","lavandula","لافندر"],e:"💜"},
+ {id:18,c:"flower",ar:"غاردينيا",en:"Gardenia",wf:"daily",ff:"mi",fd:"حديد تركيز عالٍ",nt:"حساسة جداً للعطش وتكلس التربة",k:["gardenia","غاردينيا"],e:"🌸"},
+ {id:19,c:"flower",ar:"ياسمين بلدي",en:"Jasmine local",wf:"alt",ff:"mo",fd:"NPK + حديد",nt:"يتحمل الحرارة أكثر من الهندي",k:["jasmine","jasminum","ياسمين"],e:"🌼"},
+ {id:20,c:"flower",ar:"ياسمين عراقي",en:"Jasmine Iraqi",wf:"alt",ff:"mo",fd:"NPK + حديد",nt:"يتحمل الحرارة أكثر من الهندي",k:["jasmine","jasminum","ياسمين"],e:"🌼"},
+ {id:21,c:"flower",ar:"ياسمين هندي",en:"Indian jasmine",wf:"alt",ff:"mo",fd:"NPK + حديد",nt:"أوراقه كبيرة — يبخر الماء أسرع",k:["jasmine","jasminum sambac","ياسمين"],e:"🌼"},
+ {id:22,c:"flower",ar:"ورد جوري",en:"Damascus rose",wf:"alt",ff:"mo",fd:"فوسفور عالٍ",nt:"افحص الأوراق السفلى — المن الأسود",k:["rose","rosa","ورد","damascus rose"],e:"🌹"},
+ {id:23,c:"flower",ar:"خبيزة",en:"Mallow",wf:"alt",ff:"mo",fd:"جرعة خفيفة",nt:"نبتة قوية تتحمل الشمس",k:["mallow","malva","خبيزة"],e:"🌸"},
+ {id:24,c:"flower",ar:"زهرة فم السمكة",en:"Snapdragon",wf:"alt",ff:"mo",fd:"NPK",nt:"حولية — طاقة مستمرة للتزهير",k:["snapdragon","antirrhinum","فم السمكة"],e:"🌺"},
+ {id:25,c:"flower",ar:"وش القطة",en:"Pansy/Viola",wf:"alt",ff:"mo",fd:"NPK",nt:"حولية — طاقة مستمرة للتزهير",k:["pansy","viola","وش القطة"],e:"🌸"},
+ {id:26,c:"flower",ar:"الزهر الصغير (متنوع)",en:"Mixed flowers",wf:"alt",ff:"mo",fd:"NPK",nt:"حولية — طاقة مستمرة للتزهير",k:["flowers","زهر"],e:"🌺"},
+ {id:27,c:"veg",  ar:"عباد الشمس",en:"Sunflower",wf:"alt",ff:"mo",fd:"NPK",nt:"حولية — طاقة مستمرة للتزهير",k:["sunflower","helianthus","عباد الشمس"],e:"🌻"},
+ {id:28,c:"veg",  ar:"فليفلة حادة (أحمر)",en:"Red chili",wf:"alt",ff:"mo",fd:"NPK",nt:"العطش يسقط الأزهار قبل عقد الثمار",k:["pepper","capsicum","فليفلة","chili"],e:"🌶️"},
+ {id:29,c:"veg",  ar:"فليفلة حادة (أصفر)",en:"Yellow chili",wf:"alt",ff:"mo",fd:"NPK",nt:"العطش يسقط الأزهار قبل عقد الثمار",k:["pepper","capsicum","فليفلة","chili"],e:"🫑"},
+ {id:30,c:"cactus",ar:"صبارة",en:"Cactus",wf:"e6",ff:"ban",fd:"محظور",nt:"الري الزائد يعفنها فوراً",k:["cactus","صبارة","cacti"],e:"🌵"},
+ {id:31,c:"cactus",ar:"ألوفيرا",en:"Aloe vera",wf:"e6",ff:"ban",fd:"محظور",nt:"الري الزائد يعفنها فوراً",k:["aloe","aloe vera","ألوفيرا"],e:"🌵"},
+ {id:32,c:"tree", ar:"سرو ليموني",en:"Lemon cypress",wf:"alt",ff:"ban",fd:"محظور",nt:"توازن دقيق — لا عطش ولا تغديق",k:["cypress","cupressus","سرو","lemon cypress"],e:"🌲"},
+];
+
+const CLBL={fruit:"أشجار مثمرة",herb:"عطريات",flower:"زينة ومزهرات",veg:"حولية وخضار",cactus:"صباريات",tree:"أشجار زينة"};
+const WLBL={daily:"يومياً 🔴",flex:"يومياً أو يوم بعد يوم 🟠",alt:"يوم بعد يوم 🟡",e3:"كل 3–4 أيام 🟢",e6:"كل 5–7 أيام 🔵"};
+const WB  ={daily:"br",flex:"bo",alt:"by",e3:"bg",e6:"bb"};
+const FLBL={bw:"⚡ كل 15 يوماً",mo:"✓ شهرياً",mi:"🔩 شهرياً حديد++",ban:"⛔ محظور"};
+const FB  ={bw:"bo",mo:"bg",mi:"bb",ban:"br"};
+const AR  ={"citrus limon":"شجرة الليمون","lemon":"الليمون","citrus sinensis":"شجرة البرتقال","orange":"البرتقال","mentha":"النعنع","mint":"النعنع","melissa":"المليسة","lemon balm":"المليسة","gardenia":"الغاردينيا","jasminum":"الياسمين","jasmine":"الياسمين","rosa":"الورد","rose":"الورد","lavandula":"اللافندر","lavender":"اللافندر","rosmarinus":"إكليل الجبل","rosemary":"إكليل الجبل","aloe":"الألوفيرا","aloe vera":"الألوفيرا","cactus":"الصبارة","cupressus":"السرو","cypress":"السرو","helianthus":"عباد الشمس","sunflower":"عباد الشمس","capsicum":"الفليفلة","pepper":"الفليفلة","morus":"شجرة التوت","mulberry":"شجرة التوت","prunus persica":"شجرة الخوخ","peach":"شجرة الخوخ","vitis":"العنب","grape":"العنب","juglans":"شجرة الجوز","walnut":"شجرة الجوز","fortunella":"الكمكوات","kumquat":"الكمكوات","malva":"الخبيزة","mallow":"الخبيزة","antirrhinum":"زهرة فم السمكة","snapdragon":"زهرة فم السمكة","viola":"البنفسج","pansy":"البنفسج"};
+
+const START = new Date('2026-06-29T00:00:00');
+const FSTART= new Date('2026-07-01T00:00:00');
+const DAYS_AR=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+const MON_AR =['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+
+function dd(d,ref){const a=new Date(d),b=new Date(ref);a.setHours(0,0,0,0);b.setHours(0,0,0,0);return Math.floor((a-b)/86400000);}
+function today(){const d=new Date();d.setHours(0,0,0,0);return d;}
+
+function sWater(p,d){
+  const n=dd(d,START);
+  if(p.wf==='daily'||p.wf==='flex')return true;
+  if(p.wf==='alt') return n>=0&&n%2===0;
+  if(p.wf==='e3')  return n>=0&&n%3===0;
+  if(p.wf==='e6')  return n>=0&&n%6===0;
+  return false;
+}
+function sFert(p,d){
+  if(p.ff==='ban')return false;
+  const n=dd(d,FSTART);
+  if(n<0)return false;
+  if(p.ff==='bw')return n%15===0;
+  if(p.ff==='mo'||p.ff==='mi')return d.getDate()===1;
+  return false;
+}
+function daysUntilNext(interval,startRef){
+  const n=dd(today(),startRef);
+  if(n<0)return Math.abs(n);
+  return interval-(n%interval);
+}
+
+// ── NAV ──────────────────────────────────────────────────────────────
+function showScr(name){
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  document.getElementById('s'+name).classList.add('on');
+  document.getElementById('n'+name).classList.add('on');
+  if(name==='Garden')renderGarden();
+}
+
+// ── TODAY ─────────────────────────────────────────────────────────────
+function renderToday(){
+  const d=today();
+  document.getElementById('hdrDate').textContent=`${DAYS_AR[d.getDay()]} ${d.getDate()} ${MON_AR[d.getMonth()]}`;
+  document.getElementById('tdDay').textContent=DAYS_AR[d.getDay()];
+  document.getElementById('tdDate').textContent=`${d.getDate()} ${MON_AR[d.getMonth()]} ${d.getFullYear()}`;
+
+  const toW=P.filter(p=>sWater(p,d));
+  const toF=P.filter(p=>sFert(p,d));
+  document.getElementById('statWater').textContent=toW.length;
+  document.getElementById('statFert').textContent=toF.length||'—';
+
+  // Next schedule counters
+  const n15=daysUntilNext(15,FSTART);
+  const nMo=new Date(d.getFullYear(),d.getMonth()+1,1);
+  const dMo=Math.round((nMo-d)/86400000);
+
+  let html=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div class="nxt-card">
+        <div class="nxt-ic">⚡</div>
+        <div class="nxt-info">
+          <div class="nxt-title">تسميد NPK</div>
+          <div class="nxt-sub">الأشجار المثمرة</div>
+        </div>
+        <div class="nxt-days">${n15===0?'اليوم':'بعد<br>'+n15+' أيام'}</div>
+      </div>
+      <div class="nxt-card">
+        <div class="nxt-ic">🌱</div>
+        <div class="nxt-info">
+          <div class="nxt-title">تسميد شهري</div>
+          <div class="nxt-sub">باقي النباتات</div>
+        </div>
+        <div class="nxt-days">${dMo===0?'اليوم':'بعد<br>'+dMo+' أيام'}</div>
+      </div>
+    </div>`;
+
+  const dly=toW.filter(p=>p.wf==='daily');
+  const flx=toW.filter(p=>p.wf==='flex');
+  const alt=toW.filter(p=>p.wf==='alt');
+  const rst=toW.filter(p=>!['daily','flex','alt'].includes(p.wf));
+
+  if(dly.length){
+    html+=`<div class="st">🔴 ري إجباري <span class="st-cnt">${dly.length}</span></div>`;
+    html+=`<div class="card">${dly.map(pRow).join('')}</div>`;
+  }
+  if(flx.length){
+    html+=`<div class="st">🟠 فحص التربة أولاً <span class="st-cnt">${flx.length}</span></div>`;
+    html+=`<div class="card"><div class="nbox">افحص رطوبة السطح — اسقِ فقط إذا كانت التربة جافة</div>${flx.map(pRow).join('')}</div>`;
+  }
+  if(alt.length){
+    html+=`<div class="st">🟡 يوم بعد يوم <span class="st-cnt">${alt.length}</span></div>`;
+    html+=`<div class="card">${alt.map(pRow).join('')}</div>`;
+  }
+  if(rst.length){
+    html+=`<div class="st">🟢 ري دوري <span class="st-cnt">${rst.length}</span></div>`;
+    html+=`<div class="card">${rst.map(pRow).join('')}</div>`;
+  }
+  if(toF.length){
+    html+=`<div class="st">🌱 تسميد اليوم <span class="st-cnt">${toF.length}</span></div>`;
+    html+=`<div class="card">${toF.map(p=>fRow(p)).join('')}</div>`;
+  }
+  if(!toW.length&&!toF.length){
+    html='<div class="empty"><div class="ei">✨</div><p>لا مهام اليوم</p></div>';
+  }
+  document.getElementById('todayBody').innerHTML=html;
+}
+
+function pRow(p){return`<div class="pr"><div class="pe">${p.e}</div><div class="pi"><div class="pn">${p.ar}</div><div class="ps">${CLBL[p.c]}</div><div class="pbd"><span class="b ${WB[p.wf]}">${WLBL[p.wf]}</span></div></div></div>`;}
+function fRow(p){return`<div class="pr"><div class="pe">${p.e}</div><div class="pi"><div class="pn">${p.ar}</div><div class="ps">${CLBL[p.c]}</div><div class="pbd"><span class="b ${FB[p.ff]}">${FLBL[p.ff]}</span><span class="b bgr">${p.fd}</span></div></div></div>`;}
+
+// ── GARDEN ────────────────────────────────────────────────────────────
+let selCat='all';
+function renderGarden(){
+  const q=(document.getElementById('srchQ')?.value||'').trim().toLowerCase();
+  if(!document.getElementById('catChips').innerHTML){
+    const cats=['all',...Object.keys(CLBL)];
+    document.getElementById('catChips').innerHTML=cats.map((c,i)=>
+      `<button class="chip${c===selCat?' on':''}" onclick="setCat('${c}')">${c==='all'?'🌿 الكل':CLBL[c]}</button>`).join('');
+  }
+  const rows=P.filter(p=>(selCat==='all'||p.c===selCat)&&(!q||p.ar.includes(q)||p.en.toLowerCase().includes(q)));
+  if(!rows.length){document.getElementById('gardenBody').innerHTML='<div class="empty"><p>لا توجد نتائج</p></div>';return;}
+  document.getElementById('gardenBody').innerHTML=
+    `<div style="font-size:11px;color:var(--txt3);margin-bottom:8px">${rows.length} نبات</div>`+
+    `<div class="card">${rows.map(p=>`<div class="pr"><div class="pe">${p.e}</div><div class="pi"><div class="pn">${p.ar}</div><div class="ps" style="font-style:italic">${p.en}</div><div class="pbd"><span class="b ${WB[p.wf]}">${WLBL[p.wf]}</span><span class="b ${FB[p.ff]}">${FLBL[p.ff]}</span></div><div class="pnt">${p.nt}</div></div></div>`).join('')}</div>`;
+}
+function setCat(c){
+  selCat=c;
+  document.querySelectorAll('#catChips .chip').forEach((el,i)=>{
+    const cats=['all',...Object.keys(CLBL)];
+    el.classList.toggle('on',cats[i]===c);
+  });
+  renderGarden();
+}
+
+// ── IDENTIFY ──────────────────────────────────────────────────────────
+let b64=null;
+function onPhoto(inp){
+  const f=inp.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    b64=e.target.result.split(',')[1];
+    const img=document.getElementById('camImg');
+    img.src=e.target.result; img.style.display='block';
+    document.getElementById('camPh').style.display='none';
+    document.getElementById('idBtn').disabled=false;
+    document.getElementById('idResult').innerHTML='';
+    document.getElementById('noKeyHint').style.display=
+      localStorage.getItem('pkey')?'none':'block';
+  };
+  r.readAsDataURL(f);
+}
+
+async function doIdentify(){
+  const key=localStorage.getItem('pkey');
+  if(!key){showScr('Settings');toast('أدخل مفتاح API في الإعدادات');return;}
+  if(!b64){toast('التقط صورة أولاً');return;}
+  document.getElementById('idBtn').disabled=true;
+  document.getElementById('idResult').innerHTML=`<div class="loading"><div class="spin"></div><p style="margin-top:10px">جاري التعرف...</p></div>`;
+  try{
+    const res=await fetch('https://api.plant.id/v2/identify',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({images:['data:image/jpeg;base64,'+b64],api_key:key,plant_details:['common_names','wiki_description','taxonomy']})
+    });
+    if(!res.ok)throw new Error('خطأ في الاتصال: '+res.status);
+    const data=await res.json();
+    if(!data.suggestions?.length){
+      document.getElementById('idResult').innerHTML='<div class="card"><p style="text-align:center;color:var(--txt3);padding:16px">لم يتمكن من التعرف على النبتة — جرب صورة أوضح</p></div>';
+      return;
+    }
+    showResult(data.suggestions);
+  }catch(err){
+    document.getElementById('idResult').innerHTML=`<div class="card"><p style="color:var(--red);padding:8px">❌ ${err.message}</p></div>`;
+  }finally{document.getElementById('idBtn').disabled=false;}
+}
+
+function arName(sci,names){
+  const l=sci.toLowerCase();
+  for(const[k,v] of Object.entries(AR)){if(l.includes(k))return v;}
+  for(const n of(names||[])){const nl=n.toLowerCase();for(const[k,v] of Object.entries(AR)){if(nl.includes(k))return v;}}
+  return names?.[0]||sci;
+}
+
+function showResult(sug){
+  const top=sug[0];
+  const conf=Math.round(top.probability*100);
+  const sci=top.plant_name||'';
+  const ar=arName(sci,top.plant_details?.common_names);
+  const wiki=(top.plant_details?.wiki_description?.value||'').substring(0,200);
+  const matches=P.filter(p=>p.k.some(k=>sci.toLowerCase().includes(k)||k.includes(sci.toLowerCase().split(' ')[0])));
+  
+  let h=`<div class="res-card">
+    <div class="res-name">${ar}</div>
+    <div class="res-sci">${sci}</div>
+    <div style="font-size:12px;color:var(--txt2)">دقة التعريف: ${conf}%</div>
+    <div class="conf-bar"><div class="conf-fill" style="width:${conf}%"></div></div>`;
+  
+  if(matches.length){
+    const m=matches[0];
+    h+=`<div class="res-tag res-in">✅ موجودة في حديقتك: <strong>${matches.map(x=>x.ar).join('، ')}</strong></div>
+    <div style="margin-top:12px;background:var(--gbg);border-radius:10px;padding:10px 12px">
+      <div style="font-size:12px;font-weight:700;color:var(--g1);margin-bottom:6px">📋 بروتوكول العناية</div>
+      <div style="font-size:12px;color:var(--txt2);line-height:1.8">
+        🌊 <span class="b ${WB[m.wf]}">${WLBL[m.wf]}</span><br>
+        🌱 <span class="b ${FB[m.ff]}">${FLBL[m.ff]}</span> — ${m.fd}<br>
+        📝 ${m.nt}
+      </div>
+    </div>`;
+  }else{
+    h+=`<div class="res-tag res-out">🔍 غير مدرجة في قائمة حديقتك الحالية</div>`;
+  }
+  if(wiki)h+=`<div style="margin-top:10px;font-size:12px;color:var(--txt2);line-height:1.6">${wiki}...</div>`;
+  h+='</div>';
+  
+  if(sug.length>1){
+    h+=`<div class="card"><div class="card-hd">احتمالات أخرى</div>`;
+    sug.slice(1,4).forEach(s=>{
+      const c=Math.round(s.probability*100);
+      h+=`<div class="pr"><div class="pe">🌿</div><div class="pi">
+        <div class="pn">${arName(s.plant_name,s.plant_details?.common_names)}</div>
+        <div class="ps" style="font-style:italic">${s.plant_name}</div>
+        <div class="conf-bar" style="margin-top:4px"><div class="conf-fill" style="width:${c}%"></div></div>
+        <div style="font-size:10px;color:var(--txt3)">${c}%</div>
+      </div></div>`;
+    });
+    h+='</div>';
+  }
+  document.getElementById('idResult').innerHTML=h;
+}
+
+// ── SETTINGS ─────────────────────────────────────────────────────────
+function saveKey(){
+  const v=document.getElementById('apiKey').value.trim();
+  if(!v){toast('أدخل المفتاح');return;}
+  localStorage.setItem('pkey',v);
+  toast('✓ تم حفظ مفتاح API');
+}
+function loadSettings(){
+  const k=localStorage.getItem('pkey');
+  if(k)document.getElementById('apiKey').value=k;
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────
+function toast(m){
+  const t=document.getElementById('toast');
+  t.textContent=m;t.classList.add('on');
+  setTimeout(()=>t.classList.remove('on'),2500);
+}
+
+// ── SERVICE WORKER ────────────────────────────────────────────────────
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────
+renderToday();
+loadSettings();
+</script>
+</body>
+</html>
