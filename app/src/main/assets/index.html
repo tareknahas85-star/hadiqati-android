@@ -213,10 +213,13 @@ input:focus{outline:none;border-color:var(--g2);box-shadow:0 0 0 3px rgba(46,125
     </div>
   </div>
   <div class="btns">
-    <button class="btn btn-p" onclick="document.getElementById('fi').click()">📷 التقاط صورة</button>
-    <button class="btn btn-s" id="idBtn" onclick="doIdentify()" disabled>🔍 تعرف عليها</button>
+    <button class="btn btn-p" onclick="openCamera()">📷 كاميرا</button>
+    <button class="btn btn-s" onclick="openGallery()">🖼️ من الجهاز</button>
   </div>
-  <input type="file" id="fi" accept="image/*" capture="environment" onchange="onPhoto(this)">
+  <div class="btns" style="margin-top:-2px">
+    <button class="btn btn-p" id="idBtn" onclick="doIdentify()" disabled style="opacity:.45">🔍 تعرف عليها</button>
+  </div>
+  <input type="file" id="fi" accept="image/*" onchange="onPhoto(this)" style="display:none">
   <div id="idResult"></div>
   <div id="noKeyHint" style="display:none" class="nbox">
     🔑 أدخل مفتاح Plant.id API في الإعدادات للتعرف على النباتات
@@ -440,16 +443,23 @@ function fRow(p){return`<div class="pr"><div class="pe">${p.e}</div><div class="
 let selCat='all';
 function renderGarden(){
   const q=(document.getElementById('srchQ')?.value||'').trim().toLowerCase();
+  // Merge predefined + custom plants
+  const custom=JSON.parse(localStorage.getItem('customPlants')||'[]');
+  const allP=[...P,...custom];
   if(!document.getElementById('catChips').innerHTML){
-    const cats=['all',...Object.keys(CLBL)];
+    const cats=['all',...Object.keys(CLBL),'other'];
     document.getElementById('catChips').innerHTML=cats.map((c,i)=>
-      `<button class="chip${c===selCat?' on':''}" onclick="setCat('${c}')">${c==='all'?'🌿 الكل':CLBL[c]}</button>`).join('');
+      `<button class="chip${c===selCat?' on':''}" onclick="setCat('${c}')">${c==='all'?'🌿 الكل':c==='other'?'⭐ مضافة':CLBL[c]}</button>`).join('');
   }
-  const rows=P.filter(p=>(selCat==='all'||p.c===selCat)&&(!q||p.ar.includes(q)||p.en.toLowerCase().includes(q)));
+  const rows=allP.filter(p=>(selCat==='all'||p.c===selCat)&&(!q||p.ar.includes(q)||p.en.toLowerCase().includes(q.toLowerCase())));
   if(!rows.length){document.getElementById('gardenBody').innerHTML='<div class="empty"><p>لا توجد نتائج</p></div>';return;}
   document.getElementById('gardenBody').innerHTML=
     `<div style="font-size:11px;color:var(--txt3);margin-bottom:8px">${rows.length} نبات</div>`+
-    `<div class="card">${rows.map(p=>`<div class="pr"><div class="pe">${p.e}</div><div class="pi"><div class="pn">${p.ar}</div><div class="ps" style="font-style:italic">${p.en}</div><div class="pbd"><span class="b ${WB[p.wf]}">${WLBL[p.wf]}</span><span class="b ${FB[p.ff]}">${FLBL[p.ff]}</span></div><div class="pnt">${p.nt}</div></div></div>`).join('')}</div>`;
+    `<div class="card">${rows.map(p=>`<div class="pr"><div class="pe">${p.e}</div><div class="pi">
+      <div class="pn">${p.ar}${p.custom?'<span class="b bg" style="margin-right:6px;font-size:9px">جديد ⭐</span>':''}</div>
+      <div class="ps" style="font-style:italic">${p.en}</div>
+      <div class="pbd"><span class="b ${WB[p.wf]}">${WLBL[p.wf]}</span><span class="b ${FB[p.ff]}">${FLBL[p.ff]}</span></div>
+      <div class="pnt">${p.nt}</div></div></div>`).join('')}</div>`;
 }
 function setCat(c){
   selCat=c;
@@ -461,6 +471,40 @@ function setCat(c){
 }
 
 // ── IDENTIFY ──────────────────────────────────────────────────────────
+// Open device camera directly
+function openCamera(){
+  const fi=document.getElementById('fi');
+  fi.setAttribute('capture','environment');
+  fi.value=''; fi.click();
+}
+// Open gallery/files picker (no forced camera)
+function openGallery(){
+  const fi=document.getElementById('fi');
+  fi.removeAttribute('capture');
+  fi.value=''; fi.click();
+}
+// Add identified plant to custom garden list
+function addToGarden(ar,sci,en){
+  const custom=JSON.parse(localStorage.getItem('customPlants')||'[]');
+  if(custom.some(p=>p.sci===sci)){toast('موجودة مسبقاً في حديقتك ✅');return;}
+  custom.push({
+    id:'c_'+Date.now(),c:'other',ar,en:en||sci,sci,
+    wf:'alt',ff:'mo',fd:'شهرياً',
+    nt:'نبات مضاف من التعرف',
+    k:[sci.toLowerCase().split(' ')[0]],
+    e:'🌿',custom:true,
+    addedAt:new Date().toISOString().split('T')[0]
+  });
+  localStorage.setItem('customPlants',JSON.stringify(custom));
+  toast('✅ أُضيفت '+ar+' إلى حديقتي');
+  document.querySelectorAll('.add-btn').forEach(b=>{
+    b.innerHTML='✅ تمت الإضافة';
+    b.disabled=true;
+    b.style.cssText='margin-top:10px;padding:10px;font-size:13px;width:100%;background:var(--gbg);color:var(--g2);border:2px solid var(--g2);border-radius:10px;font-family:inherit;cursor:default';
+  });
+  renderGarden();
+}
+
 let b64=null;
 function onPhoto(inp){
   const f=inp.files[0]; if(!f)return;
@@ -470,7 +514,8 @@ function onPhoto(inp){
     const img=document.getElementById('camImg');
     img.src=e.target.result; img.style.display='block';
     document.getElementById('camPh').style.display='none';
-    document.getElementById('idBtn').disabled=false;
+    const btn=document.getElementById('idBtn');
+    btn.disabled=false; btn.style.opacity='1';
     document.getElementById('idResult').innerHTML='';
     document.getElementById('noKeyHint').style.display=
       localStorage.getItem('pkey')?'none':'block';
@@ -534,7 +579,16 @@ function showResult(sug){
       </div>
     </div>`;
   }else{
+    const _alreadyCustom=JSON.parse(localStorage.getItem('customPlants')||'[]').some(p=>p.sci===sci);
     h+=`<div class="res-tag res-out">🔍 غير مدرجة في قائمة حديقتك الحالية</div>`;
+    if(!_alreadyCustom){
+      const _en=(top.plant_details?.common_names?.[0]||sci).replace(/'/g,"\'");
+      h+=`<button class="btn btn-p add-btn" style="margin-top:10px;padding:10px;font-size:13px;width:100%"
+        onclick="addToGarden('${ar.replace(/'/g,"\'")}','${sci.replace(/'/g,"\'")}','${_en}')">
+        ➕ أضف إلى حديقتي</button>`;
+    }else{
+      h+=`<div class="res-tag res-in" style="margin-top:8px">✅ تمت إضافتها لحديقتك مسبقاً</div>`;
+    }
   }
   if(wiki)h+=`<div style="margin-top:10px;font-size:12px;color:var(--txt2);line-height:1.6">${wiki}...</div>`;
   h+='</div>';
