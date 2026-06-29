@@ -550,8 +550,7 @@ async function doIdentifyPlantId(){
       body:JSON.stringify({images:imgArr,similar_images:false,
         health_details:['description','treatment']})})
   ]);
-  if(res.status===401)throw new Error('401 — مفتاح Plant.id غير صالح
-تحقق من admin.kindwise.com');
+  if(res.status===401)throw new Error('401 — مفتاح Plant.id غير صالح تحقق من admin.kindwise.com');
   if(res.status===429)throw new Error('429 — نفدت الـ credits. اصنع مفتاح جديد من admin.kindwise.com');
   if(!res.ok)throw new Error('خطأ '+res.status+' من Plant.id');
   const data=await res.json();
@@ -872,11 +871,10 @@ async function fetchWeather(){
 // ── SETTINGS ─────────────────────────────────────────────────────────
 function setApiSource(src){
   localStorage.setItem('apiSource',src);
-  // Null-safe: these elements only exist on the Settings screen
-  const b1=document.getElementById('api-plantid');
-  const b2=document.getElementById('api-gemini');
-  const pf=document.getElementById('plantid-fields');
-  const gf=document.getElementById('gemini-fields');
+  var b1=document.getElementById('api-plantid');
+  var b2=document.getElementById('api-gemini');
+  var pf=document.getElementById('plantid-fields');
+  var gf=document.getElementById('gemini-fields');
   if(b1)b1.classList.toggle('on',src==='plantid');
   if(b2)b2.classList.toggle('on',src==='gemini');
   if(pf)pf.style.display=src==='plantid'?'block':'none';
@@ -908,19 +906,19 @@ function updateKeyStatus(ok,src){
     :'<div class="key-status key-ok">✅ مفتاح Plant.id محفوظ وجاهز</div>';
 }
 function loadSettings(){
-  const src=localStorage.getItem('apiSource')||'plantid';
+  var src=localStorage.getItem('apiSource')||'plantid';
   setApiSource(src);
-  const k=localStorage.getItem('pkey');
-  const el1=document.getElementById('apiKey');
+  var k=localStorage.getItem('pkey');
+  var el1=document.getElementById('apiKey');
   if(k&&el1)el1.value=k;
-  const gk=localStorage.getItem('gkey');
-  const el2=document.getElementById('geminiKey');
+  var gk=localStorage.getItem('gkey');
+  var el2=document.getElementById('geminiKey');
   if(gk&&el2)el2.value=gk;
-  const hasKey=src==='gemini'?!!gk:!!k;
+  var hasKey=src==='gemini'?!!gk:!!k;
   updateKeyStatus(hasKey,src);
-  const loc=JSON.parse(localStorage.getItem('loc')||'null');
-  const ls=document.getElementById('locStatus');
-  if(loc&&ls)ls.textContent=`✅ الموقع محفوظ: ${loc.lat.toFixed(3)}, ${loc.lon.toFixed(3)}`;
+  var loc=JSON.parse(localStorage.getItem('loc')||'null');
+  var ls=document.getElementById('locStatus');
+  if(loc&&ls)ls.textContent='✅ الموقع محفوظ: '+loc.lat.toFixed(3)+', '+loc.lon.toFixed(3);
   if(typeof updateGoogleUI==='function')updateGoogleUI();
 }
 
