@@ -934,8 +934,9 @@ function onNativePhoto(dataUrl){
   img.src=dataUrl; img.style.display='block';
   document.getElementById('camPh').style.display='none';
   document.getElementById('idResult').innerHTML='';
-  const key=localStorage.getItem('pkey');
-  if(!key){document.getElementById('noKeyHint').style.display='block';return;}
+  var src=localStorage.getItem('apiSource')||'plantid';
+  var hasKey=src==='gemini'?!!localStorage.getItem('gkey'):!!localStorage.getItem('pkey');
+  if(!hasKey){document.getElementById('noKeyHint').style.display='block';return;}
   document.getElementById('noKeyHint').style.display='none';
   doIdentify();
 }
