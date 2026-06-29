@@ -589,8 +589,8 @@ async function doIdentifyGemini(){
   // AQ. keys need x-goog-api-key header; AIzaSy keys can use ?key= param
   const isAQKey=key.startsWith('AQ.');
   const url=isAQKey
-    ?'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent'
-    :`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+    ?'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent'
+    :`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
   const hdrs={'Content-Type':'application/json'};
   if(isAQKey)hdrs['x-goog-api-key']=key;
   const res=await fetch(url,{method:'POST',headers:hdrs,
