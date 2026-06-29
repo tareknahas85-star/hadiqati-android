@@ -240,6 +240,7 @@ input:focus{outline:none;border-color:var(--g2);box-shadow:0 0 0 3px rgba(46,125
     <button class="cat-chip" onclick="filterCat('veg')">🥦 خضار</button>
     <button class="cat-chip" onclick="filterCat('succulent')">🌵 عصاريات</button>
     <button class="cat-chip" onclick="filterCat('flower')">🌸 أزهار</button>
+    <button class="cat-chip" onclick="filterCat('tree')">🌳 أشجار</button>
     <button class="cat-chip" onclick="filterCat('custom')">🌾 أخرى</button>
   </div>
   <div class="srch"><span class="srch-ic">🔍</span>
@@ -457,6 +458,15 @@ function renderToday(){
     <div class="nxt-card"><div class="nxt-ic">⚡</div><div class="nxt-info"><div class="nxt-title">تسميد NPK</div><div class="nxt-sub">الأشجار المثمرة</div></div><div class="nxt-days">${n15===0?'اليوم':'بعد '+n15+' أيام'}</div></div>
     <div class="nxt-card"><div class="nxt-ic">🌱</div><div class="nxt-info"><div class="nxt-title">تسميد شهري</div><div class="nxt-sub">باقي النباتات</div></div><div class="nxt-days">${dMo===0?'اليوم':'بعد '+dMo+' أيام'}</div></div>
   </div>`;
+  var cw=JSON.parse(localStorage.getItem('weather')||'null');
+  if(cw&&g.length){var t=cw.temp;var tip='';
+    if(t>=38)tip='\u{1f525} حرارة عالية جداً \u2014 اسقِ الصباح الباكر أو بعد الغروب';
+    else if(t>=33)tip='\u2600\ufe0f حرارة مرتفعة \u2014 اسقِ مساءً (6-8م) أو صباحاً باكراً';
+    else if(t>=25)tip='\u{1f324}\ufe0f طقس معتدل \u2014 اسقِ صباحاً أو مساءً';
+    else if(t>=15)tip='\u{1f325}\ufe0f طقس لطيف \u2014 اسقِ في الظهيرة';
+    else tip='\u2744\ufe0f طقس بارد \u2014 قلّل السقي';
+    html+='<div class="nbox" style="margin-bottom:12px">'+tip+' ('+t+'\u00b0م)</div>';
+  }
   if(!g.length){
     html+='<div class="empty"><div class="ei">📷</div><p>صوّر نبتة من تبويب<br><strong>تعرف</strong> وأضفها لحديقتك<br>ليظهر جدولها هنا</p></div>';
   }else{
@@ -538,7 +548,7 @@ function showPlantDetail(id){
   var h='<div style="padding:8px 0">';
   h+='<button onclick="renderGarden()" style="background:none;border:none;color:var(--g2);font-size:14px;font-weight:700;cursor:pointer;padding:8px 0;font-family:inherit">→ رجوع لحديقتي</button>';
   h+='<div class="card" style="margin-top:8px">';
-  h+='<div style="text-align:center;font-size:40px;margin-bottom:8px">'+p.e+'</div>';
+  if(p.photo){h+='<div style="text-align:center;margin-bottom:10px"><img src="'+p.photo+'" style="width:100%;max-width:280px;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.1)"></div>';}else{h+='<div style="text-align:center;font-size:40px;margin-bottom:8px">'+p.e+'</div>';}
   h+='<div style="text-align:center;font-size:20px;font-weight:800;color:var(--g1)">'+p.ar+'</div>';
   h+='<div style="text-align:center;font-size:13px;color:var(--txt3);font-style:italic;margin-bottom:12px">'+p.en+'</div>';
   if(p.apiSource==='gemini')h+='<div style="text-align:center;margin-bottom:10px"><span class="b bg" style="font-size:10px">✨ Gemini AI</span></div>';
@@ -554,6 +564,7 @@ function showPlantDetail(id){
     if(d.fertilize)h+='<div>🌱 <strong>التسميد:</strong> '+d.fertilize+'</div>';
     if(d.care_notes)h+='<div>📝 <strong>العناية:</strong> '+d.care_notes+'</div>';
     if(d.location_tip)h+='<div>📍 <strong>أفضل مكان:</strong> '+d.location_tip+'</div>';
+    if(d.best_water_time)h+='<div>⏰ <strong>أفضل وقت للسقي:</strong> '+d.best_water_time+'</div>';
     if(d.pot_tip)h+='<div>🪴 <strong>الحوض:</strong> '+d.pot_tip+'</div>';
     h+='</div></div>';
     if(!d.is_healthy&&d.disease_name){
@@ -577,6 +588,7 @@ function showPlantDetail(id){
     h+='</div></div>';
   }
   h+='<div style="padding:12px 0;text-align:center">';
+  h+='<div style="margin-bottom:10px"><button onclick="askGemini(\''+p.id+'\')"; class="save-btn" style="width:100%;background:var(--g1)">\u{1f4ac} اسأل Gemini عن هذه النبتة</button></div>';
   h+='<button onclick="if(confirm(\'حذف \'+p.ar+\' من الحديقة؟\')){deletePlant(\''+p.id+'\');}" class="g-del-btn" style="font-size:14px;padding:10px 20px">🗑️ حذف النبتة</button>';
   h+='</div></div>';
   document.getElementById('gardenBody').innerHTML=h;
@@ -661,25 +673,7 @@ async function doIdentifyPlantId(){
 async function doIdentifyGemini(){
   const key=localStorage.getItem('gkey');
   if(!key){showScr('Settings');throw new Error('أدخل مفتاح Gemini في الإعدادات');}
-  const prompt=`أنت خبير نباتات. حلل هذه الصورة وأجب بـ JSON فقط بدون أي نص إضافي:
-{
-  "is_plant": true,
-  "name_ar": "اسم النبات بالعربية",
-  "name_sci": "Scientific name",
-  "confidence": 95,
-  "sun": "full أو partial أو shade",
-  "root": "shallow أو medium أو deep",
-  "water": "وصف الري",
-  "fertilize": "وصف التسميد",
-  "care_notes": "ملاحظات العناية",
-  "location_tip": "أفضل مكان للزرع",
-  "pot_tip": "نصيحة الحوض المناسب",
-  "is_healthy": true,
-  "disease_name": "اسم المرض إن وجد أو فارغ",
-  "disease_pct": 0,
-  "disease_desc": "وصف المرض",
-  "disease_treatment": "العلاج المقترح"
-}`;
+  const prompt=`أنت خبير نباتات. حلل هذه الصورة وأجب بـ JSON فقط بدون أي نص إضافي: {"is_plant":true,"name_ar":"اسم عربي","name_sci":"Scientific name","confidence":95,"category":"fruit أو herb أو veg أو succulent أو flower أو tree أو custom","sun":"full أو partial أو shade","root":"shallow أو medium أو deep","water":"وصف الري","fertilize":"وصف التسميد","care_notes":"ملاحظات العناية","location_tip":"أفضل مكان","pot_tip":"نصيحة الحوض","best_water_time":"أفضل وقت للسقي مثل الصباح الباكر أو المساء","is_healthy":true,"disease_name":"","disease_pct":0,"disease_desc":"","disease_treatment":""}`;
   // AQ. keys need x-goog-api-key header; AIzaSy keys can use ?key= param
   const isAQKey=key.startsWith('AQ.');
   const url=isAQKey
@@ -911,7 +905,7 @@ function confirmAdd(){
   const newPlant={
     id:'g_'+Date.now(),
     ar,en,sciName:sci,
-    c:dbMatch?.c||'custom',
+    c:pendingResult.geminiData?.category||dbMatch?.c||'custom',
     e:dbMatch?.e||'🌿',
     wf,ff:dbMatch?.ff||'mo',fd:dbMatch?.fd||'شهرياً',
     nt:dbMatch?.nt||'',
@@ -922,7 +916,7 @@ function confirmAdd(){
     details:pendingResult.geminiData||null,
     apiSource:localStorage.getItem('apiSource')||'plantid',
   };
-  const g=getGarden();g.push(newPlant);saveGarden(g);
+  if(b64){makeThumb(b64,300,function(t){newPlant.photo=t;const g=getGarden();g.push(newPlant);saveGarden(g);});}else{const g=getGarden();g.push(newPlant);saveGarden(g);}
   document.getElementById('modalBg').style.display='none';
   toast(`✅ أُضيفت ${ar} إلى حديقتي`);
   const btn=document.getElementById('addBtn');
@@ -1105,6 +1099,20 @@ function importBackup(){
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 
+// ── PHOTO THUMBNAIL ───────────────────────────────────────────────────
+function makeThumb(b64data,maxW,cb){
+  var img=new Image();
+  img.onload=function(){
+    var c=document.createElement('canvas');
+    var ratio=maxW/img.width;
+    if(ratio>1)ratio=1;
+    c.width=img.width*ratio;c.height=img.height*ratio;
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+    cb(c.toDataURL('image/jpeg',0.6));
+  };
+  img.src='data:image/jpeg;base64,'+b64data;
+}
+
 // ── CATEGORY FILTER ───────────────────────────────────────────────────
 var activeCat='';
 function filterCat(c){
@@ -1167,6 +1175,27 @@ function scheduleNotif(){
     try{new Notification('\u{1f33f} حديقة السطح',{body:msg,icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">\u{1f331}</text></svg>'});}catch(e){}
     scheduleNotif();
   },ms);
+}
+
+// ── ASK GEMINI ────────────────────────────────────────────────────────
+function askGemini(pid){
+  var g=getGarden();var p=g.find(function(x){return x.id===pid;});
+  if(!p)return;
+  var key=localStorage.getItem('gkey');
+  if(!key){toast('فعّل Gemini في الإعدادات');return;}
+  var q=prompt('سؤالك عن '+p.ar+':');
+  if(!q)return;
+  var el=document.getElementById('gardenBody');
+  el.innerHTML='<div class="loading"><div class="spin"></div><p style="margin-top:10px">Gemini يفكر...</p></div>';
+  var isAQ=key.startsWith('AQ.');
+  var url=isAQ?'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent':'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+key;
+  var hdrs={'Content-Type':'application/json'};
+  if(isAQ)hdrs['x-goog-api-key']=key;
+  fetch(url,{method:'POST',headers:hdrs,body:JSON.stringify({contents:[{parts:[{text:'أنت خبير نباتات. النبتة: '+p.ar+' ('+p.en+'). '+q+'. أجب بالعربية باختصار.'}]}],generationConfig:{temperature:0.3}})}).then(function(r){return r.json();}).then(function(data){
+    var txt=(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts[0].text)||'لم يتمكن من الإجابة';
+    txt=txt.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+    el.innerHTML='<div style="padding:8px 0"><button onclick="showPlantDetail(\''+pid+'\')" style="background:none;border:none;color:var(--g2);font-size:14px;font-weight:700;cursor:pointer;padding:8px 0;font-family:inherit">\u2192 رجوع</button><div class="card"><div class="card-hd">\U0001f4ac '+p.ar+'</div><div style="font-size:13px;color:var(--txt2);line-height:2">'+txt+'</div></div></div>';
+  }).catch(function(e){toast('خطأ: '+e.message);showPlantDetail(pid);});
 }
 
 // ── INIT ─────────────────────────────────────────────────────────────
