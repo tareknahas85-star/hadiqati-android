@@ -174,6 +174,29 @@ input:focus{outline:none;border-color:var(--g2);box-shadow:0 0 0 3px rgba(46,125
 .task-chk{font-size:22px;color:var(--g2);flex-shrink:0;width:28px;text-align:center;cursor:pointer;user-select:none}
 .pr-done{opacity:0.45}.pr-done .pn{text-decoration:line-through}
 .pr{cursor:pointer;transition:opacity 0.2s}
+
+.ai-card{background:linear-gradient(135deg,var(--g2),var(--g1));color:#fff;border-radius:16px;padding:18px;margin-bottom:10px;cursor:pointer;transition:transform 0.15s;box-shadow:0 4px 16px rgba(27,94,32,0.2)}
+.ai-card:active{transform:scale(0.97)}
+.ai-card-title{font-size:16px;font-weight:800;margin-bottom:4px}
+.ai-card-desc{font-size:12px;opacity:0.85;line-height:1.6}
+.ai-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.ai-sm{background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:14px;text-align:center;cursor:pointer;transition:all 0.15s}
+.ai-sm:active{background:var(--gbg);border-color:var(--g3)}
+.ai-sm-ic{font-size:28px;margin-bottom:6px}
+.ai-sm-t{font-size:12px;font-weight:700;color:var(--g1)}
+.chat-bubble{padding:12px 16px;border-radius:16px;margin-bottom:8px;font-size:13px;line-height:1.8;max-width:90%}
+.chat-user{background:var(--g2);color:#fff;margin-left:auto;border-bottom-right-radius:4px}
+.chat-ai{background:var(--gbg);color:var(--txt1);border-bottom-left-radius:4px}
+.chat-input-row{display:flex;gap:8px;padding:8px 0;position:sticky;bottom:0;background:var(--bg)}
+.chat-input{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:24px;font-size:14px;font-family:inherit;outline:none}
+.chat-input:focus{border-color:var(--g2)}
+.chat-send{width:44px;height:44px;border-radius:50%;border:none;background:var(--g2);color:#fff;font-size:18px;cursor:pointer}
+.log-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;color:var(--txt2)}
+.season-card{background:#fff;border-radius:12px;padding:12px;border:1px solid var(--border);margin-bottom:8px}
+.season-month{font-size:14px;font-weight:800;color:var(--g1);margin-bottom:4px}
+.heat-alert{background:linear-gradient(135deg,#FF6F00,#E65100);color:#fff;border-radius:14px;padding:14px;margin-bottom:12px;font-size:13px;line-height:1.7}
+.note-area{width:100%;min-height:60px;padding:10px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:inherit;resize:vertical;outline:none}
+.note-area:focus{border-color:var(--g2)}
 .msym{font-family:'Material Symbols Rounded';font-size:22px;line-height:1;
   font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;}
 @media(prefers-color-scheme:dark){
@@ -240,6 +263,7 @@ input:focus{outline:none;border-color:var(--g2);box-shadow:0 0 0 3px rgba(46,125
     <button class="cat-chip" onclick="filterCat('veg')">🥦 خضار</button>
     <button class="cat-chip" onclick="filterCat('succulent')">🌵 عصاريات</button>
     <button class="cat-chip" onclick="filterCat('flower')">🌸 أزهار</button>
+    <button class="cat-chip" onclick="filterCat('tree')">🌳 أشجار</button>
     <button class="cat-chip" onclick="filterCat('tree')">🌳 أشجار</button>
     <button class="cat-chip" onclick="filterCat('custom')">🌾 أخرى</button>
   </div>
@@ -360,10 +384,32 @@ input:focus{outline:none;border-color:var(--g2);box-shadow:0 0 0 3px rgba(46,125
   </div>
 </div>
 
+
+<!-- AI ASSISTANT -->
+<div id="sAI" class="scr">
+  <div class="ai-card" onclick="openDoctorChat()">
+    <div class="ai-card-title">💬 دكتور النباتات</div>
+    <div class="ai-card-desc">اسأل أي سؤال عن نباتاتك — الري، التسميد، الأمراض، العناية</div>
+  </div>
+  <div class="ai-grid">
+    <div class="ai-sm" onclick="aiBugCheck()"><div class="ai-sm-ic">🐛</div><div class="ai-sm-t">تعريف حشرة</div></div>
+    <div class="ai-sm" onclick="aiSoilCheck()"><div class="ai-sm-ic">🧪</div><div class="ai-sm-t">تحليل التربة</div></div>
+    <div class="ai-sm" onclick="aiRecipes()"><div class="ai-sm-ic">🍽️</div><div class="ai-sm-t">وصفات من حديقتك</div></div>
+    <div class="ai-sm" onclick="aiSuggest()"><div class="ai-sm-ic">🌱</div><div class="ai-sm-t">اقتراح نباتات</div></div>
+    <div class="ai-sm" onclick="aiRoofPlan()"><div class="ai-sm-ic">📐</div><div class="ai-sm-t">مخطط السطح</div></div>
+    <div class="ai-sm" onclick="aiReport()"><div class="ai-sm-ic">📈</div><div class="ai-sm-t">تقرير شهري</div></div>
+  </div>
+  <div class="card" onclick="showSeason()" style="cursor:pointer">
+    <div class="card-hd">🗓️ تقويم الزراعة — دمشق</div>
+    <div style="font-size:12px;color:var(--txt3)">شو تزرع هالشهر؟ اضغط لتشوف</div>
+  </div>
+  <div id="aiBody"></div>
+</div>
 <nav class="bnav">
   <button class="nb on" id="nToday"    onclick="showScr('Today')"><span class="msym ni">calendar_today</span>اليوم</button>
   <button class="nb"    id="nIdentify" onclick="showScr('Identify')"><span class="msym ni">camera_alt</span>تعرف</button>
   <button class="nb"    id="nGarden"   onclick="showScr('Garden')"><span class="msym ni">eco</span>حديقتي</button>
+  <button class="nb"    id="nAI"       onclick="showScr('AI')"><span class="msym ni">smart_toy</span>المساعد</button>
   <button class="nb"    id="nSettings" onclick="showScr('Settings')"><span class="msym ni">settings</span>إعدادات</button>
 </nav>
 <div class="toast" id="toast"></div>
@@ -438,6 +484,7 @@ function showScr(name){
   document.getElementById('n'+name).classList.add('on');
   if(name==='Garden')renderGarden();
   if(name==='Settings')loadSettings();
+  if(name==='AI')document.getElementById('aiBody').innerHTML='';
 }
 
 // ── TODAY ─────────────────────────────────────────────────────────────
@@ -489,8 +536,9 @@ function renderToday(){
     toF.forEach(function(p){if(isDone(todayKey('f',p.id)))doneCount++;});
     var pct=Math.round(doneCount/allTasks*100);
     var bar='<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--txt3);margin-bottom:4px"><span>'+doneCount+'/'+allTasks+' مهمة</span><span>'+pct+'%</span></div><div style="background:var(--border);border-radius:6px;height:8px;overflow:hidden"><div style="background:var(--g2);height:100%;border-radius:6px;width:'+pct+'%;transition:width 0.3s"></div></div></div>';
-    html=bar+html;
+    html=bar+'<div style="text-align:left;margin-bottom:8px"><button onclick="showWaterLog()" style="background:none;border:none;color:var(--g2);font-size:12px;cursor:pointer;font-family:inherit">\U0001f4dd \u0639\u0631\u0636 \u0627\u0644\u0633\u062c\u0644</button></div>'+html;
   }
+  html=checkHeatAlert()+html;
   document.getElementById('todayBody').innerHTML=html;
 }
 function pRow(p){var dk=todayKey('w',p.id);var done=isDone(dk);return`<div class="pr ${done?'pr-done':''}" onclick="toggleTask('${dk}',this)"><div class="task-chk">${done?'\u2611':'\u2610'}</div><div class="pe">${p.e}</div><div class="pi"><div class="pn">${p.ar}</div><div class="pbd"><span class="b ${WB[p.wf]}">${WLBL[p.wf]}</span></div></div></div>`;}
@@ -548,7 +596,7 @@ function showPlantDetail(id){
   var h='<div style="padding:8px 0">';
   h+='<button onclick="renderGarden()" style="background:none;border:none;color:var(--g2);font-size:14px;font-weight:700;cursor:pointer;padding:8px 0;font-family:inherit">→ رجوع لحديقتي</button>';
   h+='<div class="card" style="margin-top:8px">';
-  if(p.photo){h+='<div style="text-align:center;margin-bottom:10px"><img src="'+p.photo+'" style="width:100%;max-width:280px;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.1)"></div>';}else{h+='<div style="text-align:center;font-size:40px;margin-bottom:8px">'+p.e+'</div>';}
+  if(p.photo){h+='<div style="text-align:center;margin-bottom:10px"><img src="'+p.photo+'" style="width:100%;max-width:280px;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.1)"></div>';}else{if(p.photo){h+='<div style="text-align:center;margin-bottom:10px"><img src="'+p.photo+'" style="width:100%;max-width:280px;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.1)"></div>';}else{h+='<div style="text-align:center;font-size:40px;margin-bottom:8px">'+p.e+'</div>';}}
   h+='<div style="text-align:center;font-size:20px;font-weight:800;color:var(--g1)">'+p.ar+'</div>';
   h+='<div style="text-align:center;font-size:13px;color:var(--txt3);font-style:italic;margin-bottom:12px">'+p.en+'</div>';
   if(p.apiSource==='gemini')h+='<div style="text-align:center;margin-bottom:10px"><span class="b bg" style="font-size:10px">✨ Gemini AI</span></div>';
@@ -588,7 +636,9 @@ function showPlantDetail(id){
     h+='</div></div>';
   }
   h+='<div style="padding:12px 0;text-align:center">';
-  h+='<div style="margin-bottom:10px"><button onclick="askGemini(\''+p.id+'\')"; class="save-btn" style="width:100%;background:var(--g1)">\u{1f4ac} اسأل Gemini عن هذه النبتة</button></div>';
+  
+  h+='<div class="card"><div class="card-hd">\U0001f4dd \u0645\u0644\u0627\u062d\u0638\u0627\u062a\u0643 \u0627\u0644\u0634\u062e\u0635\u064a\u0629</div><textarea class="note-area" id="pnote_'+p.id+'" placeholder="\u0627\u0643\u062a\u0628 \u0645\u0644\u0627\u062d\u0638\u0627\u062a\u0643 \u0647\u0646\u0627...">'+(p.notes||'')+'</textarea><button onclick="savePlantNote(\''+p.id+'\')" class="save-btn" style="margin-top:8px">\U0001f4be \u062d\u0641\u0638</button></div>';
+h+='<div style="margin-bottom:10px"><button onclick="askGemini(\''+p.id+'\')"; class="save-btn" style="width:100%;background:var(--g1)">\u{1f4ac} اسأل Gemini عن هذه النبتة</button></div>';
   h+='<button onclick="if(confirm(\'حذف \'+p.ar+\' من الحديقة؟\')){deletePlant(\''+p.id+'\');}" class="g-del-btn" style="font-size:14px;padding:10px 20px">🗑️ حذف النبتة</button>';
   h+='</div></div>';
   document.getElementById('gardenBody').innerHTML=h;
@@ -673,7 +723,7 @@ async function doIdentifyPlantId(){
 async function doIdentifyGemini(){
   const key=localStorage.getItem('gkey');
   if(!key){showScr('Settings');throw new Error('أدخل مفتاح Gemini في الإعدادات');}
-  const prompt=`أنت خبير نباتات. حلل هذه الصورة وأجب بـ JSON فقط بدون أي نص إضافي: {"is_plant":true,"name_ar":"اسم عربي","name_sci":"Scientific name","confidence":95,"category":"fruit أو herb أو veg أو succulent أو flower أو tree أو custom","sun":"full أو partial أو shade","root":"shallow أو medium أو deep","water":"وصف الري","fertilize":"وصف التسميد","care_notes":"ملاحظات العناية","location_tip":"أفضل مكان","pot_tip":"نصيحة الحوض","best_water_time":"أفضل وقت للسقي مثل الصباح الباكر أو المساء","is_healthy":true,"disease_name":"","disease_pct":0,"disease_desc":"","disease_treatment":""}`;
+  const prompt=`You are a plant expert. Analyze this image and respond ONLY with JSON, no extra text: {"is_plant":true,"name_ar":"Arabic name","name_sci":"Scientific name","confidence":95,"category":"fruit or herb or veg or succulent or flower or tree or custom","sun":"full or partial or shade","root":"shallow or medium or deep","water":"watering desc in Arabic","fertilize":"fertilizing desc in Arabic","care_notes":"care notes in Arabic","location_tip":"best location in Arabic","pot_tip":"pot advice in Arabic","best_water_time":"best watering time in Arabic","is_healthy":true,"disease_name":"","disease_pct":0,"disease_desc":"","disease_treatment":""}`;
   // AQ. keys need x-goog-api-key header; AIzaSy keys can use ?key= param
   const isAQKey=key.startsWith('AQ.');
   const url=isAQKey
@@ -916,7 +966,7 @@ function confirmAdd(){
     details:pendingResult.geminiData||null,
     apiSource:localStorage.getItem('apiSource')||'plantid',
   };
-  if(b64){makeThumb(b64,300,function(t){newPlant.photo=t;const g=getGarden();g.push(newPlant);saveGarden(g);});}else{const g=getGarden();g.push(newPlant);saveGarden(g);}
+  if(b64){makeThumb(b64,300,function(t){newPlant.photo=t;if(b64){makeThumb(b64,300,function(t){newPlant.photo=t;var gg=getGarden();gg.push(newPlant);saveGarden(gg);});}else{var gg=getGarden();gg.push(newPlant);saveGarden(gg);}});}else{const g=getGarden();g.push(newPlant);saveGarden(g);}
   document.getElementById('modalBg').style.display='none';
   toast(`✅ أُضيفت ${ar} إلى حديقتي`);
   const btn=document.getElementById('addBtn');
@@ -1029,6 +1079,7 @@ function onNativePhoto(dataUrl){
   var hasKey=src==='gemini'?!!localStorage.getItem('gkey'):!!localStorage.getItem('pkey');
   if(!hasKey){document.getElementById('noKeyHint').style.display='block';return;}
   document.getElementById('noKeyHint').style.display='none';
+  if(window._aiMode){setupAIPhotoHook();return;}
   doIdentify();
 }
 
@@ -1130,7 +1181,11 @@ function todayKey(type,plantId){
 function isDone(key){return localStorage.getItem(key)==='1';}
 function toggleTask(key,el){
   if(isDone(key)){localStorage.removeItem(key);}
-  else{localStorage.setItem(key,'1');}
+  else{localStorage.setItem(key,'1');
+    var parts=key.split('_');var type=parts[2];var pid=parts[3];
+    var g=getGarden();var p=g.find(function(x){return x.id===pid;});
+    if(p)logTask(type,pid,p.ar);
+  }
   renderToday();
 }
 
@@ -1197,6 +1252,169 @@ function askGemini(pid){
     el.innerHTML='<div style="padding:8px 0"><button onclick="showPlantDetail(\''+pid+'\')" style="background:none;border:none;color:var(--g2);font-size:14px;font-weight:700;cursor:pointer;padding:8px 0;font-family:inherit">\u2192 رجوع</button><div class="card"><div class="card-hd">\U0001f4ac '+p.ar+'</div><div style="font-size:13px;color:var(--txt2);line-height:2">'+txt+'</div></div></div>';
   }).catch(function(e){toast('خطأ: '+e.message);showPlantDetail(pid);});
 }
+
+// ── GEMINI HELPER ────────────────────────────────────────────────────
+function geminiCall(prompt,cb,imgB64){
+  var key=localStorage.getItem('gkey');
+  if(!key){toast('فعّل Gemini في الإعدادات');return;}
+  var isAQ=key.startsWith('AQ.');
+  var url=isAQ?'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent':'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+key;
+  var hdrs={'Content-Type':'application/json'};
+  if(isAQ)hdrs['x-goog-api-key']=key;
+  var parts=[{text:prompt}];
+  if(imgB64)parts.unshift({inline_data:{mime_type:'image/jpeg',data:imgB64}});
+  fetch(url,{method:'POST',headers:hdrs,body:JSON.stringify({contents:[{parts:parts}],generationConfig:{temperature:0.3}})}).then(function(r){return r.json();}).then(function(data){
+    var txt=(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts[0].text)||'';
+    cb(txt);
+  }).catch(function(e){cb('خطأ: '+e.message);});
+}
+function fmtAI(txt){return txt.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');}
+
+// ── DOCTOR CHAT ──────────────────────────────────────────────────────
+function openDoctorChat(){
+  var el=document.getElementById('aiBody');
+  var h='<div style="padding:8px 0"><button onclick="document.getElementById(\'aiBody\').innerHTML=\'\'" style="background:none;border:none;color:var(--g2);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">→ رجوع</button>';
+  h+='<div id="chatMsgs" style="margin-top:8px;min-height:200px"></div>';
+  h+='<div class="chat-input-row"><input id="chatIn" class="chat-input" placeholder="اسأل دكتور النباتات..." onkeydown="if(event.key===\'Enter\')sendChat()"><button class="chat-send" onclick="sendChat()">➤</button></div></div>';
+  el.innerHTML=h;
+  var gl=getGarden().map(function(p){return p.ar;}).join(', ');
+  addChatBubble('مرحبا! أنا دكتور النباتات 🌿'+(gl?'<br>عندك: '+gl+'<br>كيف بقدر ساعدك؟':'<br>كيف بقدر ساعدك؟'),'ai');
+}
+function addChatBubble(txt,who){
+  var el=document.getElementById('chatMsgs');if(!el)return;
+  el.innerHTML+='<div class="chat-bubble chat-'+who+'">'+fmtAI(txt)+'</div>';el.scrollTop=el.scrollHeight;
+}
+function sendChat(){
+  var inp=document.getElementById('chatIn');if(!inp)return;
+  var q=inp.value.trim();if(!q)return;inp.value='';
+  addChatBubble(q,'user');
+  var gc=getGarden().map(function(p){return p.ar+' ('+p.en+')';}).join(', ');
+  var w=JSON.parse(localStorage.getItem('weather')||'null');
+  var s='أنت دكتور نباتات خبير. المستخدم عنده حديقة سطح في دمشق';
+  if(w)s+=', الحرارة '+w.temp+' درجة';
+  if(gc)s+='. نباتاته: '+gc;
+  s+='. أجب بالعربية باختصار. السؤال: '+q;
+  addChatBubble('...','ai');
+  geminiCall(s,function(txt){var m=document.getElementById('chatMsgs');if(m)m.removeChild(m.lastChild);addChatBubble(txt,'ai');});
+}
+
+// ── AI FEATURES ──────────────────────────────────────────────────────
+function aiBugCheck(){
+  var el=document.getElementById('aiBody');
+  el.innerHTML='<div class="card"><div class="card-hd">🐛 تعريف الحشرات</div><p style="font-size:13px;color:var(--txt2);margin-bottom:12px">صوّر الحشرة وبقلك إذا مفيدة أو ضارة</p><button class="btn btn-p" style="width:100%" onclick="Android.openCamera();window._aiMode=\'bug\'">📷 صوّر الحشرة</button></div>';
+}
+function aiSoilCheck(){
+  var el=document.getElementById('aiBody');
+  el.innerHTML='<div class="card"><div class="card-hd">🧪 تحليل التربة</div><p style="font-size:13px;color:var(--txt2);margin-bottom:12px">صوّر التربة وبحللها لك</p><button class="btn btn-p" style="width:100%" onclick="Android.openCamera();window._aiMode=\'soil\'">📷 صوّر التربة</button></div>';
+}
+function aiRecipes(){
+  var g=getGarden();if(!g.length){toast('أضف نباتات أولا');return;}
+  var el=document.getElementById('aiBody');
+  el.innerHTML='<div class="loading"><div class="spin"></div><p style="margin-top:10px">Gemini يحضّر وصفات...</p></div>';
+  geminiCall('عندي في حديقتي: '+g.map(function(p){return p.ar;}).join(', ')+'. اقترح 3 وصفات سهلة من هالنباتات. لكل وصفة: الاسم، المكونات، الطريقة باختصار. بالعربي.',function(txt){
+    el.innerHTML='<div class="card"><div class="card-hd">🍽 وصفات من حديقتك</div><div style="font-size:13px;color:var(--txt2);line-height:2">'+fmtAI(txt)+'</div></div>';
+  });
+}
+function aiSuggest(){
+  var g=getGarden();var el=document.getElementById('aiBody');
+  el.innerHTML='<div class="loading"><div class="spin"></div><p style="margin-top:10px">Gemini يفكر...</p></div>';
+  var w=JSON.parse(localStorage.getItem('weather')||'null');
+  var p='حديقة سطح في دمشق';if(w)p+=', حرارة '+w.temp;
+  if(g.length)p+='. عندي: '+g.map(function(x){return x.ar;}).join(', ');
+  geminiCall(p+'. اقترح 5 نباتات جديدة مناسبة. لكل نبتة: الاسم، ليش مناسبة، نصيحة. بالعربي.',function(txt){
+    el.innerHTML='<div class="card"><div class="card-hd">🌱 نباتات مقترحة</div><div style="font-size:13px;color:var(--txt2);line-height:2">'+fmtAI(txt)+'</div></div>';
+  });
+}
+function aiRoofPlan(){
+  var dims=prompt('أدخل قياسات سطحك (مثال: 4x6 متر):');if(!dims)return;
+  var el=document.getElementById('aiBody');
+  el.innerHTML='<div class="loading"><div class="spin"></div><p style="margin-top:10px">يخطط السطح...</p></div>';
+  var g=getGarden();
+  geminiCall('سطح بقياس '+dims+' في دمشق. نباتاتي: '+(g.length?g.map(function(x){return x.ar;}).join(', '):'لسا ما زرعت')+'. اقترح أفضل توزيع مع مراعاة الشمس والمسافات. ارسم مخطط نصي. بالعربي.',function(txt){
+    el.innerHTML='<div class="card"><div class="card-hd">📐 مخطط السطح</div><div style="font-size:13px;color:var(--txt2);line-height:2;white-space:pre-wrap">'+fmtAI(txt)+'</div></div>';
+  });
+}
+function aiReport(){
+  var g=getGarden();if(!g.length){toast('أضف نباتات أولا');return;}
+  var el=document.getElementById('aiBody');
+  el.innerHTML='<div class="loading"><div class="spin"></div><p style="margin-top:10px">يحضّر التقرير...</p></div>';
+  var info=g.map(function(p){var d=p.details||{};return p.ar+': '+(d.is_healthy===false?'مريضة':'سليمة');}).join('; ');
+  var w=JSON.parse(localStorage.getItem('weather')||'null');
+  geminiCall('تقرير شهري لحديقة سطح في دمشق'+(w?', حرارة '+w.temp:'.')+' النباتات: '+info+'. اكتب: ملخص، نباتات تحتاج انتباه، نصائح الشهر القادم، تقييم من 10. بالعربي.',function(txt){
+    el.innerHTML='<div class="card"><div class="card-hd">📈 التقرير الشهري</div><div style="font-size:13px;color:var(--txt2);line-height:2">'+fmtAI(txt)+'</div></div>';
+  });
+}
+
+// ── SEASONAL CALENDAR ────────────────────────────────────────────────
+var SEASONS={0:{m:'يناير',t:'تقليم الأشجار، تجهيز التربة، زراعة البصل والثوم'},1:{m:'فبراير',t:'زراعة البطاطا والبازلاء، تسميد الحمضيات'},2:{m:'مارس',t:'زراعة الطماطم والفلفل، الفراولة، الأعشاب العطرية'},3:{m:'أبريل',t:'زراعة الباذنجان والكوسا، نقل الشتول للأحواض'},4:{m:'مايو',t:'زراعة النعنع والريحان، بدء السقي اليومي'},5:{m:'يونيو',t:'تكثيف السقي، تظليل النباتات الحساسة، قطف الأعشاب'},6:{m:'يوليو',t:'سقي مكثف صباح ومساء، حماية من الحرارة'},7:{m:'أغسطس',t:'تسميد شهري، تقليم خفيف، تجهيز لزراعة الخريف'},8:{m:'سبتمبر',t:'زراعة السبانخ والخس، تقليل السقي تدريجيا'},9:{m:'أكتوبر',t:'زراعة البصل الشتوي، تسميد الأشجار المثمرة'},10:{m:'نوفمبر',t:'تغطية النباتات الحساسة، زراعة الفول'},11:{m:'ديسمبر',t:'حماية من الصقيع، تقليم الأشجار، تخطيط لموسم جديد'}};
+function showSeason(){
+  var el=document.getElementById('aiBody');var now=new Date().getMonth();var h='';
+  for(var i=0;i<12;i++){var m=(now+i)%12;var s=SEASONS[m];var cur=i===0;
+    h+='<div class="season-card" style="'+(cur?'border-color:var(--g2);border-width:2px;background:var(--gbg)':'')+'"><div class="season-month">'+(cur?'👉 ':'')+s.m+'</div><div style="font-size:12px;color:var(--txt2);line-height:1.7">'+s.t+'</div></div>';
+  }
+  el.innerHTML=h;
+}
+
+// ── PHOTO THUMBNAIL ──────────────────────────────────────────────────
+function makeThumb(b64data,maxW,cb){
+  var img=new Image();img.onload=function(){
+    var c=document.createElement('canvas');var ratio=Math.min(maxW/img.width,1);
+    c.width=img.width*ratio;c.height=img.height*ratio;
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+    cb(c.toDataURL('image/jpeg',0.6));
+  };img.src='data:image/jpeg;base64,'+b64data;
+}
+
+// ── WATERING LOG ─────────────────────────────────────────────────────
+function logTask(type,plantId,plantName){
+  var logs=JSON.parse(localStorage.getItem('waterLog')||'[]');
+  logs.unshift({type:type,id:plantId,name:plantName,time:new Date().toISOString()});
+  if(logs.length>200)logs=logs.slice(0,200);
+  localStorage.setItem('waterLog',JSON.stringify(logs));
+}
+function showWaterLog(){
+  var logs=JSON.parse(localStorage.getItem('waterLog')||'[]');
+  if(!logs.length){toast('لا سجلات بعد');return;}
+  var el=document.getElementById('todayBody');
+  var h='<div style="padding:4px 0"><button onclick="renderToday()" style="background:none;border:none;color:var(--g2);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">→ رجوع</button>';
+  h+='<div class="card" style="margin-top:8px"><div class="card-hd">📝 سجل الري والتسميد</div>';
+  logs.slice(0,50).forEach(function(l){
+    var d=new Date(l.time);var ts=d.toLocaleDateString('ar')+' '+d.toLocaleTimeString('ar',{hour:'2-digit',minute:'2-digit'});
+    h+='<div class="log-item"><span>'+(l.type==='w'?'💧':'🌱')+'</span><span style="flex:1">'+l.name+'</span><span style="color:var(--txt3)">'+ts+'</span></div>';
+  });
+  h+='</div></div>';el.innerHTML=h;
+}
+
+// ── PERSONAL NOTES ───────────────────────────────────────────────────
+function savePlantNote(plantId){
+  var ta=document.getElementById('pnote_'+plantId);if(!ta)return;
+  var g=getGarden();var p=g.find(function(x){return x.id===plantId;});
+  if(p){p.notes=ta.value;saveGarden(g);toast('✓ تم حفظ الملاحظة');}
+}
+
+// ── AI PHOTO ANALYSIS ────────────────────────────────────────────────
+function setupAIPhotoHook(){
+  if(window._aiMode&&b64){
+    var mode=window._aiMode;window._aiMode=null;
+    var el=document.getElementById('aiBody');
+    el.innerHTML='<div class="loading"><div class="spin"></div><p style="margin-top:10px">Gemini يحلل الصورة...</p></div>';
+    showScr('AI');
+    var pr=mode==='bug'?'حلل هذه الصورة. إذا فيها حشرة: اسمها بالعربية، مفيدة أو ضارة، والحل إذا ضارة. بالعربي.':'حلل هذه الصورة للتربة. نوعها، رطوبتها، مناسبة للزراعة؟ اقترح تحسينات. بالعربي.';
+    var ti=mode==='bug'?'🐛 نتيجة تحليل الحشرة':'🧪 نتيجة تحليل التربة';
+    geminiCall(pr,function(txt){
+      el.innerHTML='<div class="card"><div class="card-hd">'+ti+'</div><div style="font-size:13px;color:var(--txt2);line-height:2">'+fmtAI(txt)+'</div></div>';
+    },b64);
+  }
+}
+
+// ── HEAT WAVE ALERT ──────────────────────────────────────────────────
+function checkHeatAlert(){
+  var w=JSON.parse(localStorage.getItem('weather')||'null');if(!w)return '';
+  if(w.temp>=40)return '<div class="heat-alert">🔥 <strong>تحذير موجة حر!</strong> '+w.temp+'°م<br>اسق ضعف الكمية — صباحا قبل 7 ومساء بعد 7<br>ظلّل النباتات الحساسة</div>';
+  if(w.temp>=38)return '<div class="heat-alert" style="background:linear-gradient(135deg,#FF8F00,#F57F17)">☀️ <strong>حرارة عالية!</strong> '+w.temp+'°م — زوّد السقي وتجنب الظهيرة</div>';
+  return '';
+}
+
 
 // ── INIT ─────────────────────────────────────────────────────────────
 renderToday();
