@@ -872,11 +872,15 @@ async function fetchWeather(){
 // ── SETTINGS ─────────────────────────────────────────────────────────
 function setApiSource(src){
   localStorage.setItem('apiSource',src);
-  document.getElementById('api-plantid').classList.toggle('on',src==='plantid');
-  document.getElementById('api-gemini').classList.toggle('on',src==='gemini');
-  document.getElementById('plantid-fields').style.display=src==='plantid'?'block':'none';
-  document.getElementById('gemini-fields').style.display=src==='gemini'?'block':'none';
-  updateKeyStatus(false);
+  // Null-safe: these elements only exist on the Settings screen
+  const b1=document.getElementById('api-plantid');
+  const b2=document.getElementById('api-gemini');
+  const pf=document.getElementById('plantid-fields');
+  const gf=document.getElementById('gemini-fields');
+  if(b1)b1.classList.toggle('on',src==='plantid');
+  if(b2)b2.classList.toggle('on',src==='gemini');
+  if(pf)pf.style.display=src==='plantid'?'block':'none';
+  if(gf)gf.style.display=src==='gemini'?'block':'none';
 }
 function saveKey(){
   const src=localStorage.getItem('apiSource')||'plantid';
@@ -907,14 +911,17 @@ function loadSettings(){
   const src=localStorage.getItem('apiSource')||'plantid';
   setApiSource(src);
   const k=localStorage.getItem('pkey');
-  if(k)document.getElementById('apiKey').value=k;
+  const el1=document.getElementById('apiKey');
+  if(k&&el1)el1.value=k;
   const gk=localStorage.getItem('gkey');
-  if(gk)document.getElementById('geminiKey').value=gk;
+  const el2=document.getElementById('geminiKey');
+  if(gk&&el2)el2.value=gk;
   const hasKey=src==='gemini'?!!gk:!!k;
   updateKeyStatus(hasKey,src);
   const loc=JSON.parse(localStorage.getItem('loc')||'null');
-  if(loc)document.getElementById('locStatus').textContent=`✅ الموقع محفوظ: ${loc.lat.toFixed(3)}, ${loc.lon.toFixed(3)}`;
-  updateGoogleUI();
+  const ls=document.getElementById('locStatus');
+  if(loc&&ls)ls.textContent=`✅ الموقع محفوظ: ${loc.lat.toFixed(3)}, ${loc.lon.toFixed(3)}`;
+  if(typeof updateGoogleUI==='function')updateGoogleUI();
 }
 
 // ── TOAST ─────────────────────────────────────────────────────────────
