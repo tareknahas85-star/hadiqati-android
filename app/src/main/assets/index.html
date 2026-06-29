@@ -12,7 +12,7 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --g1:#1B5E20;--g2:#2E7D32;--g3:#388E3C;--g4:#66BB6A;--gbg:#E8F5E9;--glt:#F1F8E9;
+  --g1:#0D3B1A;--g2:#1B5E20;--g3:#2E7D32;--g4:#4CAF50;--gbg:#E0F2E1;--glt:#F1F8E9;
   --red:#C62828;--rbg:#FFEBEE;
   --ora:#E65100;--obg:#FFF3E0;
   --yel:#F9A825;--ybg:#FFFDE7;
@@ -175,7 +175,7 @@ input:focus{outline:none;border-color:var(--g2);box-shadow:0 0 0 3px rgba(46,125
 .pr-done{opacity:0.45}.pr-done .pn{text-decoration:line-through}
 .pr{cursor:pointer;transition:opacity 0.2s}
 
-.ai-card{background:linear-gradient(135deg,var(--g2),var(--g1));color:#fff;border-radius:16px;padding:18px;margin-bottom:10px;cursor:pointer;transition:transform 0.15s;box-shadow:0 4px 16px rgba(27,94,32,0.2)}
+.ai-card{background:linear-gradient(135deg,#1B5E20,#0D3B1A);color:#fff;border-radius:16px;padding:18px;margin-bottom:10px;cursor:pointer;transition:transform 0.15s;box-shadow:0 4px 16px rgba(27,94,32,0.2)}
 .ai-card:active{transform:scale(0.97)}
 .ai-card-title{font-size:16px;font-weight:800;margin-bottom:4px}
 .ai-card-desc{font-size:12px;opacity:0.85;line-height:1.6}
@@ -381,9 +381,19 @@ input:focus{outline:none;border-color:var(--g2);box-shadow:0 0 0 3px rgba(46,125
       <button class="btn btn-s" onclick="closeModal()">إلغاء</button>
       <button class="btn btn-p" onclick="confirmAdd()">➕ إضافة لحديقتي</button>
     </div>
+  
+  <div class="card" style="margin-top:16px;text-align:center;background:linear-gradient(180deg,#f8faf7,#eef2ec);border:1.5px solid var(--border)">
+    <div style="font-size:14px;font-weight:800;color:var(--g1);margin-bottom:4px">Tarek Nahas</div>
+    <div style="font-size:12px;color:var(--txt3);margin-bottom:8px">tareknahas85@gmail.com</div>
+    <div style="display:flex;justify-content:center;gap:12px;margin-bottom:10px">
+      <a href="https://github.com/tareknahas85-star" style="color:var(--g2);font-size:12px;text-decoration:none;font-weight:600">GitHub</a>
+    </div>
+    <div style="font-size:11px;color:var(--txt3);line-height:1.6;margin-bottom:8px">Hadiqati v1.0<br>Rooftop Garden Management App</div>
+    <div style="text-align:right;font-size:10px;color:var(--txt3);font-style:italic;opacity:0.7;margin-top:6px">RTL</div>
   </div>
-</div>
 
+</div>
+</div>
 
 <!-- AI ASSISTANT -->
 <div id="sAI" class="scr">
