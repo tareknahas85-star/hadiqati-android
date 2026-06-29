@@ -168,6 +168,12 @@ input:focus{outline:none;border-color:var(--g2);box-shadow:0 0 0 3px rgba(46,125
 .g-del-btn{background:none;border:none;color:var(--red);font-size:12px;font-weight:700;
   cursor:pointer;padding:4px 8px;border-radius:8px;font-family:inherit}
 .g-del-btn:hover{background:var(--rbg)}
+.cat-chip{padding:6px 14px;border-radius:20px;border:1.5px solid var(--g3);background:white;
+  color:var(--g1);font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.cat-chip.on{background:var(--g2);color:white;border-color:var(--g2)}
+.task-chk{font-size:22px;color:var(--g2);flex-shrink:0;width:28px;text-align:center;cursor:pointer;user-select:none}
+.pr-done{opacity:0.45}.pr-done .pn{text-decoration:line-through}
+.pr{cursor:pointer;transition:opacity 0.2s}
 .msym{font-family:'Material Symbols Rounded';font-size:22px;line-height:1;
   font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;}
 @media(prefers-color-scheme:dark){
@@ -227,6 +233,15 @@ input:focus{outline:none;border-color:var(--g2);box-shadow:0 0 0 3px rgba(46,125
 
 <!-- GARDEN -->
 <div id="sGarden" class="scr">
+  <div id="catFilter" style="display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px;-webkit-overflow-scrolling:touch">
+    <button class="cat-chip on" onclick="filterCat('')">🌱 الكل</button>
+    <button class="cat-chip" onclick="filterCat('fruit')">🍋 فاكهة</button>
+    <button class="cat-chip" onclick="filterCat('herb')">🌿 أعشاب</button>
+    <button class="cat-chip" onclick="filterCat('veg')">🥦 خضار</button>
+    <button class="cat-chip" onclick="filterCat('succulent')">🌵 عصاريات</button>
+    <button class="cat-chip" onclick="filterCat('flower')">🌸 أزهار</button>
+    <button class="cat-chip" onclick="filterCat('custom')">🌾 أخرى</button>
+  </div>
   <div class="srch"><span class="srch-ic">🔍</span>
     <input type="text" id="srchQ" placeholder="ابحث باسم النبات..." oninput="renderGarden()">
   </div>
@@ -257,7 +272,20 @@ input:focus{outline:none;border-color:var(--g2);box-shadow:0 0 0 3px rgba(46,125
     <div id="keyStatus" style="margin-top:8px"></div>
     <button class="save-btn" onclick="saveKey()">💾 حفظ المفتاح</button>
   </div>
-  <div class="card">
+    <div class="card">
+    <div class="card-hd">⏰ تنبيهات الري والتسميد</div>
+    <span class="lbl">وقت التنبيه اليومي:</span>
+    <input type="time" id="notifTime" value="19:00" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;font-size:16px;font-family:inherit;text-align:center;margin-top:6px">
+    <div class="hint">بيجيك تنبيه كل يوم بهاد الوقت بمهام الري والتسميد</div>
+    <div style="margin-top:8px;display:flex;align-items:center;gap:8px">
+      <label style="font-size:13px;color:var(--txt2);display:flex;align-items:center;gap:6px;cursor:pointer">
+        <input type="checkbox" id="notifEnabled" onchange="saveNotifSettings()" style="width:18px;height:18px;accent-color:var(--g2)">
+        تفعيل التنبيهات
+      </label>
+    </div>
+    <button class="save-btn" onclick="saveNotifSettings();toast('✓ تم حفظ إعدادات التنبيه')">🔔 حفظ إعدادات التنبيه</button>
+  </div>
+<div class="card">
     <div class="card-hd">🌍 الطقس والموقع</div>
     <p style="font-size:13px;color:var(--txt2);margin-bottom:10px">
       الطقس الحقيقي يساعد على تعديل مواعيد الري تلقائياً
@@ -443,16 +471,26 @@ function renderToday(){
     if(toF.length){html+=`<div class="st">🌱 تسميد اليوم <span class="st-cnt">${toF.length}</span></div><div class="card">${toF.map(fRow).join('')}</div>`;}
     if(!toW.length&&!toF.length){html+='<div class="empty"><div class="ei">✨</div><p>لا مهام ري أو تسميد اليوم</p></div>';}
   }
+    // Task progress
+  var allTasks=toW.length+toF.length;
+  if(allTasks>0){
+    var doneCount=0;
+    toW.forEach(function(p){if(isDone(todayKey('w',p.id)))doneCount++;});
+    toF.forEach(function(p){if(isDone(todayKey('f',p.id)))doneCount++;});
+    var pct=Math.round(doneCount/allTasks*100);
+    var bar='<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--txt3);margin-bottom:4px"><span>'+doneCount+'/'+allTasks+' مهمة</span><span>'+pct+'%</span></div><div style="background:var(--border);border-radius:6px;height:8px;overflow:hidden"><div style="background:var(--g2);height:100%;border-radius:6px;width:'+pct+'%;transition:width 0.3s"></div></div></div>';
+    html=bar+html;
+  }
   document.getElementById('todayBody').innerHTML=html;
 }
-function pRow(p){return`<div class="pr"><div class="pe">${p.e}</div><div class="pi"><div class="pn">${p.ar}</div><div class="pbd"><span class="b ${WB[p.wf]}">${WLBL[p.wf]}</span></div></div></div>`;}
-function fRow(p){return`<div class="pr"><div class="pe">${p.e}</div><div class="pi"><div class="pn">${p.ar}</div><div class="pbd"><span class="b ${FB[p.ff]}">${FLBL[p.ff]}</span><span class="b bgr">${p.fd}</span></div></div></div>`;}
+function pRow(p){var dk=todayKey('w',p.id);var done=isDone(dk);return`<div class="pr ${done?'pr-done':''}" onclick="toggleTask('${dk}',this)"><div class="task-chk">${done?'\u2611':'\u2610'}</div><div class="pe">${p.e}</div><div class="pi"><div class="pn">${p.ar}</div><div class="pbd"><span class="b ${WB[p.wf]}">${WLBL[p.wf]}</span></div></div></div>`;}
+function fRow(p){var dk=todayKey('f',p.id);var done=isDone(dk);return`<div class="pr ${done?'pr-done':''}" onclick="toggleTask('${dk}',this)"><div class="task-chk">${done?'\u2611':'\u2610'}</div><div class="pe">${p.e}</div><div class="pi"><div class="pn">${p.ar}</div><div class="pbd"><span class="b ${FB[p.ff]}">${FLBL[p.ff]}</span><span class="b bgr">${p.fd}</span></div></div></div>`;}
 
 // ── GARDEN ────────────────────────────────────────────────────────────
 function renderGarden(){
   const g=getGarden();
   const q=(document.getElementById('srchQ')?.value||'').trim().toLowerCase();
-  const rows=g.filter(p=>!q||p.ar.includes(q)||p.en.toLowerCase().includes(q));
+  const rows=g.filter(p=>(!q||p.ar.includes(q)||p.en.toLowerCase().includes(q))&&(!activeCat||p.c===activeCat));
   if(!rows.length&&!g.length){
     document.getElementById('gardenBody').innerHTML=`<div class="empty"><div class="ei">🌱</div><p>حديقتك فارغة حالياً<br>صوّر نبتة من تبويب <strong>تعرف</strong><br>وأضفها هنا بضغطة واحدة</p></div>`;return;
   }
@@ -978,6 +1016,7 @@ function loadSettings(){
   var ls=document.getElementById('locStatus');
   if(loc&&ls)ls.textContent='✅ الموقع محفوظ: '+loc.lat.toFixed(3)+', '+loc.lon.toFixed(3);
   if(typeof updateGoogleUI==='function')updateGoogleUI();
+  loadNotifSettings();
 }
 
 // ── TOAST ─────────────────────────────────────────────────────────────
@@ -1066,6 +1105,70 @@ function importBackup(){
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 
+// ── CATEGORY FILTER ───────────────────────────────────────────────────
+var activeCat='';
+function filterCat(c){
+  activeCat=c;
+  document.querySelectorAll('.cat-chip').forEach(function(b){b.classList.remove('on');});
+  event.target.classList.add('on');
+  renderGarden();
+}
+
+// ── TASK CHECKLIST ───────────────────────────────────────────────────
+function todayKey(type,plantId){
+  var ds=today().toISOString().split('T')[0];
+  return 'done_'+ds+'_'+type+'_'+plantId;
+}
+function isDone(key){return localStorage.getItem(key)==='1';}
+function toggleTask(key,el){
+  if(isDone(key)){localStorage.removeItem(key);}
+  else{localStorage.setItem(key,'1');}
+  renderToday();
+}
+
+// ── NOTIFICATION SETTINGS ────────────────────────────────────────────
+function saveNotifSettings(){
+  var t=document.getElementById('notifTime');
+  var en=document.getElementById('notifEnabled');
+  if(t)localStorage.setItem('notifTime',t.value);
+  if(en)localStorage.setItem('notifEnabled',en.checked?'1':'0');
+  scheduleNotif();
+}
+function loadNotifSettings(){
+  var t=document.getElementById('notifTime');
+  var en=document.getElementById('notifEnabled');
+  var sv=localStorage.getItem('notifTime')||'19:00';
+  var se=localStorage.getItem('notifEnabled')==='1';
+  if(t)t.value=sv;
+  if(en)en.checked=se;
+}
+var notifTimer=null;
+function scheduleNotif(){
+  if(notifTimer)clearTimeout(notifTimer);
+  if(localStorage.getItem('notifEnabled')!=='1')return;
+  if(!('Notification' in window))return;
+  if(Notification.permission==='default')Notification.requestPermission();
+  var tm=localStorage.getItem('notifTime')||'19:00';
+  var parts=tm.split(':');
+  var now=new Date();
+  var target=new Date(now.getFullYear(),now.getMonth(),now.getDate(),parseInt(parts[0]),parseInt(parts[1]),0);
+  if(target<=now)target.setDate(target.getDate()+1);
+  var ms=target-now;
+  notifTimer=setTimeout(function(){
+    var g=getGarden();
+    var d=new Date();
+    var wc=g.filter(function(p){return sWater(p,d);}).length;
+    var fc=g.filter(function(p){return sFert(p,d);}).length;
+    var msg='';
+    if(wc)msg+=wc+' نبتة تحتاج سقي';
+    if(wc&&fc)msg+=' و ';
+    if(fc)msg+=fc+' نبتة تحتاج تسميد';
+    if(!msg)msg='لا مهام لليوم';
+    try{new Notification('\u{1f33f} حديقة السطح',{body:msg,icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">\u{1f331}</text></svg>'});}catch(e){}
+    scheduleNotif();
+  },ms);
+}
+
 // ── INIT ─────────────────────────────────────────────────────────────
 renderToday();
 loadSettings();
@@ -1075,6 +1178,7 @@ if(cachedW&&Date.now()-cachedW.ts<3600000)document.getElementById('hdrBadge').te
 // Auto-fetch weather if location saved
 const savedLoc=JSON.parse(localStorage.getItem('loc')||'null');
 if(savedLoc){userLat=savedLoc.lat;userLon=savedLoc.lon;fetchWeather();}
+scheduleNotif();
 </script>
 </body>
 </html>
