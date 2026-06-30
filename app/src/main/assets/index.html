@@ -748,16 +748,18 @@ function onPhoto(inp){
   const f=inp.files[0];if(!f)return;
   const r=new FileReader();
   r.onload=e=>{
-    b64=e.target.result.split(',')[1];
     const img=document.getElementById('camImg');
     img.src=e.target.result;img.style.display='block';
     document.getElementById('camPh').style.display='none';
     document.getElementById('idResult').innerHTML='';
-    const src=localStorage.getItem('apiSource')||'plantid';
-    const hasKey=src==='gemini'?!!localStorage.getItem('gkey'):!!localStorage.getItem('pkey');
-    if(!hasKey){document.getElementById('noKeyHint').style.display='block';return;}
-    document.getElementById('noKeyHint').style.display='none';
-    doIdentify(); // auto-identify
+    makeThumb(e.target.result.split(',')[1],1024,function(resizedDataUrl){
+      b64=resizedDataUrl.split(',')[1];
+      const src=localStorage.getItem('apiSource')||'plantid';
+      const hasKey=src==='gemini'?!!localStorage.getItem('gkey'):!!localStorage.getItem('pkey');
+      if(!hasKey){document.getElementById('noKeyHint').style.display='block';return;}
+      document.getElementById('noKeyHint').style.display='none';
+      doIdentify(); // auto-identify
+    });
   };
   r.readAsDataURL(f);
 }
@@ -1051,7 +1053,7 @@ function confirmAdd(){
     details:pendingResult.geminiData||null,
     apiSource:localStorage.getItem('apiSource')||'plantid',
   };
-  if(b64){makeThumb(b64,300,function(t){newPlant.photo=t;if(b64){makeThumb(b64,300,function(t){newPlant.photo=t;var gg=getGarden();gg.push(newPlant);saveGarden(gg);});}else{var gg=getGarden();gg.push(newPlant);saveGarden(gg);}});}else{const g=getGarden();g.push(newPlant);saveGarden(g);}
+  if(b64){makeThumb(b64,300,function(t){newPlant.photo=t;var gg=getGarden();gg.push(newPlant);saveGarden(gg);});}else{const g=getGarden();g.push(newPlant);saveGarden(g);}
   document.getElementById('modalBg').style.display='none';
   toast(`✅ أُضيفت ${ar} إلى حديقتي`);
   const btn=document.getElementById('addBtn');
