@@ -1,3 +1,5 @@
+
+  initGoogleUI();
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -223,6 +225,7 @@ input:focus{outline:none;border-color:var(--g2);box-shadow:0 0 0 3px rgba(46,125
 .companion-bad{background:#FFEBEE;border-left-color:#C62828}
 
 </style>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 <header class="hdr">
@@ -335,6 +338,21 @@ input:focus{outline:none;border-color:var(--g2);box-shadow:0 0 0 3px rgba(46,125
   </div>
   <div class="card">
     <div class="card-hd">☁️ Google والنسخ الاحتياطي</div>
+    <div id="googleStatus" style="margin-bottom:12px"></div>
+    <div id="googleSignInArea">
+      <button class="btn btn-p" style="width:100%;margin-bottom:10px" onclick="doGoogleSignIn()">
+        🔑 تسجيل الدخول بحساب Google
+      </button>
+      <p style="font-size:11px;color:var(--txt3);text-align:center;margin-bottom:8px">
+        للحصول على صلاحيات Google Drive + Calendar
+      </p>
+    </div>
+    <div id="googleConnected" style="display:none">
+      <div style="background:var(--gbg);padding:10px;border-radius:8px;margin-bottom:10px;font-size:12px;color:var(--g2)">
+        ✅ متصل بـ <span id="gUserEmail" style="font-weight:700"></span>
+      </div>
+      <button class="btn btn-s" style="width:100%" onclick="doGoogleSignOut()">تسجيل خروج</button>
+    </div>
     <p style="font-size:12px;color:var(--txt2);line-height:1.7;margin-bottom:12px">
       سجّل دخول بحساب Google لحفظ حديقتك على Drive واستعادتها في أي وقت.
     </p>
@@ -1810,6 +1828,132 @@ function downloadBackupPDF(){
   a.download = 'hadiqati_backup_' + new Date().getTime() + '.txt';
   a.click();
 }
+
+
+// Google OAuth
+var GCLIENT_ID = "668068124363-lhoiug35huvsc71i5l96b7q6t7urak5f.apps.googleusercontent.com";
+var gToken = localStorage.getItem('gToken') || '';
+var gTokenExpiry = parseInt(localStorage.getItem('gTokenExpiry') || '0');
+
+function initGoogleUI(){
+  if(gToken && Date.now() < gTokenExpiry){
+    showGoogleConnected();
+  } else {
+    gToken = '';
+    localStorage.removeItem('gToken');
+    showGoogleSignIn();
+  }
+}
+
+function showGoogleSignIn(){
+  var a = document.getElementById('googleSignInArea');
+  var c = document.getElementById('googleConnected');
+  if(a) a.style.display = 'block';
+  if(c) c.style.display = 'none';
+}
+
+function showGoogleConnected(){
+  var a = document.getElementById('googleSignInArea');
+  var c = document.getElementById('googleConnected');
+  if(a) a.style.display = 'none';
+  if(c) c.style.display = 'block';
+  var em = document.getElementById('gUserEmail');
+  if(em) em.textContent = localStorage.getItem('gUserEmail') || 'Google';
+}
+
+function doGoogleSignIn(){
+  try {
+    var client = google.accounts.oauth2.initTokenClient({
+      client_id: GCLIENT_ID,
+      scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/calendar',
+      callback: function(resp){
+        if(resp.access_token){
+          gToken = resp.access_token;
+          gTokenExpiry = Date.now() + (resp.expires_in * 1000);
+          localStorage.setItem('gToken', gToken);
+          localStorage.setItem('gTokenExpiry', gTokenExpiry.toString());
+          fetchGoogleEmail();
+          showGoogleConnected();
+          alert('\u2705 \u062a\u0645 \u062a\u0633\u062c\u064a\u0644 \u0627\u0644\u062f\u062e\u0648\u0644 \u0628\u0646\u062c\u0627\u062d!');
+        }
+      }
+    });
+    client.requestAccessToken();
+  } catch(e){
+    alert('\u274c Google Sign-In error: ' + e.message);
+  }
+}
+
+function fetchGoogleEmail(){
+  fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+    headers: {'Authorization': 'Bearer ' + gToken}
+  }).then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d.email){
+        localStorage.setItem('gUserEmail', d.email);
+        var em = document.getElementById('gUserEmail');
+        if(em) em.textContent = d.email;
+      }
+    }).catch(function(){});
+}
+
+function doGoogleSignOut(){
+  gToken = '';
+  localStorage.removeItem('gToken');
+  localStorage.removeItem('gTokenExpiry');
+  localStorage.removeItem('gUserEmail');
+  showGoogleSignIn();
+  alert('\u062a\u0645 \u062a\u0633\u062c\u064a\u0644 \u0627\u0644\u062e\u0631\u0648\u062c');
+}
+
+// Google Drive Backup - upload PDF
+function doBackupNow(){
+  if(!gToken || Date.now() >= gTokenExpiry){
+    alert('\u0633\u062c\u0651\u0644 \u062f\u062e\u0648\u0644 \u0628\u062d\u0633\u0627\u0628 Google \u0623\u0648\u0644\u0627\u064b');
+    return;
+  }
+  var garden = JSON.parse(localStorage.getItem('myGarden') || '[]');
+  var waterLog = JSON.parse(localStorage.getItem('waterLog') || '[]');
+  var txt = '\u0646\u0633\u062e\u0629 \u0627\u062d\u062a\u064a\u0627\u0637\u064a\u0629 - \u062d\u062f\u064a\u0642\u0629 \u0627\u0644\u0633\u0637\u062d\n';
+  txt += '\u0627\u0644\u062a\u0627\u0631\u064a\u062e: ' + new Date().toLocaleDateString('ar-SY') + '\n\n';
+  txt += '\u0639\u062f\u062f \u0627\u0644\u0646\u0628\u0627\u062a\u0627\u062a: ' + garden.length + '\n';
+  txt += '\u0633\u062c\u0644 \u0627\u0644\u0631\u064a: ' + waterLog.length + ' \u0625\u062f\u062e\u0627\u0644\n\n';
+  garden.forEach(function(p){
+    txt += '- ' + (p.ar || p.en) + ' (' + (p.c || '') + ')\n';
+  });
+  txt += '\n\u0633\u062c\u0644 \u0627\u0644\u0631\u064a:\n';
+  waterLog.slice(-20).forEach(function(w){
+    txt += w.time + ' | ' + w.name + ' | ' + w.type + '\n';
+  });
+  
+  var blob = new Blob([txt], {type: 'text/plain'});
+  var metadata = {
+    name: 'Hadiqati_Backup_' + new Date().toISOString().slice(0,10) + '.txt',
+    mimeType: 'text/plain'
+  };
+  var form = new FormData();
+  form.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
+  form.append('file', blob);
+  
+  fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+    method: 'POST',
+    headers: {'Authorization': 'Bearer ' + gToken},
+    body: form
+  }).then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d.id){
+        localStorage.setItem('lastBackup', new Date().toLocaleDateString('ar-SY'));
+        localStorage.setItem('lastBackupTime', Date.now().toString());
+        alert('\u2705 \u062a\u0645 \u0627\u0644\u062d\u0641\u0638 \u0641\u064a Google Drive!');
+        openBackupUI();
+      } else {
+        alert('\u274c \u062e\u0637\u0623: ' + JSON.stringify(d));
+      }
+    }).catch(function(e){
+      alert('\u274c ' + e.message);
+    });
+}
+
 </script>
 </body>
 </html>
