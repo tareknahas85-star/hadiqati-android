@@ -9,7 +9,6 @@ import android.os.Environment
 import android.os.Message
 import android.provider.MediaStore
 import android.util.Base64
-import android.view.View
 import android.view.WindowManager
 import android.webkit.*
 import android.widget.FrameLayout
@@ -57,7 +56,7 @@ class MainActivity : AppCompatActivity() {
                 runOnUiThread {
                     webView.evaluateJavascript("onNativePhoto('$data')", null)
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 runOnUiThread {
                     webView.evaluateJavascript("toast('\u274c \u062e\u0637\u0623 \u0641\u064a \u0642\u0631\u0627\u0621\u0629 \u0627\u0644\u0635\u0648\u0631\u0629')", null)
                 }
@@ -69,7 +68,7 @@ class MainActivity : AppCompatActivity() {
         val ts  = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
         val dir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         File.createTempFile("PLANT_${ts}_", ".jpg", dir)
-    } catch (e: Exception) { null }
+    } catch (_: Exception) { null }
 
     private fun launchCamera() {
         val file = createImageFile() ?: run {
@@ -88,6 +87,10 @@ class MainActivity : AppCompatActivity() {
     private fun launchGallery() {
         launcher.launch(Intent(Intent.ACTION_PICK).apply { type = "image/*" })
     }
+
+    // Chrome-like user agent (remove WebView "wv" flag for Google OAuth)
+    private fun cleanUserAgent(ua: String): String =
+        ua.replace("; wv)", ")").replace("Version/4.0 ", "")
 
     inner class Bridge {
         @JavascriptInterface
@@ -117,16 +120,16 @@ class MainActivity : AppCompatActivity() {
                 javaScriptCanOpenWindowsAutomatically = true
                 setSupportMultipleWindows(true)
                 setGeolocationEnabled(true)
+                // Remove WebView identifier so Google OAuth works
+                userAgentString = cleanUserAgent(userAgentString)
             }
 
             webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                     val url = request.url.toString()
-                    // Allow Google OAuth URLs inside WebView
                     if (url.contains("accounts.google.com") || url.contains("googleapis.com")) {
                         return false
                     }
-                    // External links open in browser
                     if (url.startsWith("http")) {
                         startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
                         return true
@@ -150,7 +153,7 @@ class MainActivity : AppCompatActivity() {
                     callback: GeolocationPermissions.Callback
                 ) { callback.invoke(origin, true, false) }
 
-                // Handle Google Sign-In popup window
+                // Handle Google Sign-In popup
                 override fun onCreateWindow(
                     view: WebView, isDialog: Boolean,
                     isUserGesture: Boolean, resultMsg: Message?
@@ -158,12 +161,59 @@ class MainActivity : AppCompatActivity() {
                     val popup = WebView(this@MainActivity).apply {
                         settings.javaScriptEnabled = true
                         settings.domStorageEnabled = true
-                        settings.userAgentString = view.settings.userAgentString
+                        // Same clean user agent for popup
+                        settings.userAgentString = cleanUserAgent(settings.userAgentString)
+
                         webViewClient = object : WebViewClient() {
                             override fun shouldOverrideUrlLoading(v: WebView, req: WebResourceRequest): Boolean {
+                                val u = req.url.toString()
+                                // Intercept OAuth redirect
+                                if (u.startsWith("https://hadiqati-garden.web.app/callback")) {
+                                    // Token is in fragment - but fragment not in URL here
+                                    // Load the URL to get the fragment via JS
+                                    return false
+                                }
                                 return false
                             }
+
+                            override fun onPageFinished(v: WebView, url: String) {
+                                // Check if we landed on the callback page
+                                if (url.startsWith("https://hadiqati-garden.web.app/callback")) {
+                                    // Extract token from URL fragment via JS
+                                    v.evaluateJavascript(
+                                        "(function(){ return window.location.hash; })()"
+                                    ) { hash ->
+                                        val h = hash.replace("\"", "")
+                                        if (h.contains("access_token")) {
+                                            val params = h.removePrefix("#").split("&")
+                                            var token = ""
+                                            var expires = "3600"
+                                            for (p in params) {
+                                                val kv = p.split("=", limit = 2)
+                                                if (kv.size == 2) {
+                                                    when (kv[0]) {
+                                                        "access_token" -> token = kv[1]
+                                                        "expires_in"   -> expires = kv[1]
+                                                    }
+                                                }
+                                            }
+                                            if (token.isNotEmpty()) {
+                                                runOnUiThread {
+                                                    // Pass token back to main WebView
+                                                    webView.evaluateJavascript(
+                                                        "onOAuthToken('$token','$expires')", null
+                                                    )
+                                                    // Close popup
+                                                    container.removeView(v)
+                                                    v.destroy()
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
+
                         webChromeClient = object : WebChromeClient() {
                             override fun onCloseWindow(window: WebView) {
                                 container.removeView(window)
@@ -171,6 +221,7 @@ class MainActivity : AppCompatActivity() {
                             }
                         }
                     }
+
                     container.addView(popup, FrameLayout.LayoutParams(
                         FrameLayout.LayoutParams.MATCH_PARENT,
                         FrameLayout.LayoutParams.MATCH_PARENT
@@ -184,14 +235,6 @@ class MainActivity : AppCompatActivity() {
                 override fun onCloseWindow(window: WebView) {
                     container.removeView(window)
                     window.destroy()
-                }
-
-                // Handle JS alerts
-                override fun onJsAlert(
-                    view: WebView, url: String, message: String,
-                    result: JsResult
-                ): Boolean {
-                    return false // default handling
                 }
             }
 
@@ -207,10 +250,10 @@ class MainActivity : AppCompatActivity() {
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                // Close popup first if exists
                 if (container.childCount > 1) {
                     val popup = container.getChildAt(container.childCount - 1)
                     container.removeView(popup)
+                    if (popup is WebView) popup.destroy()
                     return
                 }
                 if (webView.canGoBack()) webView.goBack() else finish()
