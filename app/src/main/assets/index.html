@@ -1124,7 +1124,6 @@ function loadSettings(){
   var loc=JSON.parse(localStorage.getItem('loc')||'null');
   var ls=document.getElementById('locStatus');
   if(loc&&ls)ls.textContent='✅ الموقع محفوظ: '+loc.lat.toFixed(3)+', '+loc.lon.toFixed(3);
-  if(typeof updateGoogleUI==='function')// Google UI managed by initGoogleUI
   loadNotifSettings();
 }
 
@@ -1834,37 +1833,24 @@ function showGoogleConnected(){
 }
 
 function doGoogleSignIn(){
-  var redirectUri = 'https://hadiqati-garden.web.app/callback';
   var scope = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/userinfo.email';
   var url = 'https://accounts.google.com/o/oauth2/v2/auth'
     + '?client_id=' + encodeURIComponent(GCLIENT_ID)
-    + '&redirect_uri=' + encodeURIComponent(redirectUri)
+    + '&redirect_uri=' + encodeURIComponent('https://hadiqati-garden.web.app/callback')
     + '&response_type=token'
     + '&scope=' + encodeURIComponent(scope)
     + '&prompt=consent';
-  
-  // Open Google sign-in in popup (handled by MainActivity WebView)
-  var popup = window.open(url, '_blank', 'width=500,height=600');
-  
-  // Poll for token in URL hash
-  var pollTimer = setInterval(function(){
-    try {
-      if(popup.closed) { clearInterval(pollTimer); return; }
-      var hash = popup.location.hash;
-      if(hash && hash.includes('access_token')){
-        clearInterval(pollTimer);
-        var params = new URLSearchParams(hash.substring(1));
-        gToken = params.get('access_token');
-        var expiresIn = parseInt(params.get('expires_in') || '3600');
-        gTokenExpiry = Date.now() + (expiresIn * 1000);
-        localStorage.setItem('gToken', gToken);
-        localStorage.setItem('gTokenExpiry', gTokenExpiry.toString());
-        popup.close();
-        fetchGoogleEmail();
-        showGoogleConnected();
-      }
-    } catch(e){}
-  }, 500);
+  // Opens in popup WebView (handled by MainActivity) with Chrome user agent
+  window.open(url, '_blank');
+}
+// Called from popup redirect or manually
+function onOAuthToken(token, expiresIn){
+  gToken = token;
+  gTokenExpiry = Date.now() + (parseInt(expiresIn || '3600') * 1000);
+  localStorage.setItem('gToken', gToken);
+  localStorage.setItem('gTokenExpiry', gTokenExpiry.toString());
+  fetchGoogleEmail();
+  showGoogleConnected();
 }
 
 function fetchGoogleEmail(){
