@@ -248,20 +248,40 @@ input:focus{outline:none;border-color:var(--g2);box-shadow:0 0 0 3px rgba(46,125
 
 <!-- IDENTIFY -->
 <div id="sIdentify" class="scr">
-  <div class="cam-wrap" id="camWrap" onclick="pickPhoto()">
-    <img id="camImg" alt="">
-    <div class="cam-ph" id="camPh">
-      <span class="ci">📷</span>
-      <p>اضغط لتصوير نبتة<br>أو رفع صورة</p>
+  <div style="text-align:center;padding:20px 0 10px">
+    <div style="font-size:28px;margin-bottom:4px">🌿</div>
+    <div style="font-size:18px;font-weight:800;color:var(--g1)">تعرّف على نبتتك</div>
+    <div style="font-size:12px;color:var(--txt3);margin-top:4px">صوّر أي نبتة والذكاء الاصطناعي بيخبرك عنها</div>
+  </div>
+
+  <div class="cam-wrap" id="camWrap" onclick="pickPhoto()" style="border-radius:20px;overflow:hidden;margin:0 0 16px;background:linear-gradient(145deg,#1a3a1a,#2d5a2d);min-height:220px;display:flex;align-items:center;justify-content:center">
+    <img id="camImg" alt="" style="border-radius:20px">
+    <div class="cam-ph" id="camPh" style="color:#fff">
+      <div style="width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;backdrop-filter:blur(4px)">
+        <span class="msym" style="font-size:32px;color:#fff">photo_camera</span>
+      </div>
+      <p style="font-size:14px;opacity:0.9;margin:0">اضغط هنا لالتقاط صورة</p>
     </div>
   </div>
-  <div class="btns">
-    <button class="btn btn-p" onclick="openCamera()">📷 كاميرا</button>
-    <button class="btn btn-s" onclick="openGallery()">🖼️ من الجهاز</button>
+
+  <div style="display:flex;gap:10px;margin-bottom:16px">
+    <button class="btn btn-p" onclick="openCamera()" style="flex:1;border-radius:14px;padding:14px;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px">
+      <span class="msym" style="font-size:20px">camera_alt</span>
+      كاميرا
+    </button>
+    <button class="btn btn-s" onclick="openGallery()" style="flex:1;border-radius:14px;padding:14px;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px">
+      <span class="msym" style="font-size:20px">photo_library</span>
+      من الجهاز
+    </button>
   </div>
-  <!-- hidden inputs as fallback when Android bridge is not available -->
-  <input type="file" id="fi-cam"  accept="image/*" capture="environment" onchange="onPhoto(this)" style="display:none">
-  <input type="file" id="fi-gal"  accept="image/*"                       onchange="onPhoto(this)" style="display:none">
+
+  <div style="background:var(--gbg);border-radius:12px;padding:12px;text-align:center;font-size:11px;color:var(--txt3);line-height:1.8">
+    <span class="msym" style="font-size:16px;color:var(--g2);vertical-align:middle">tips_and_updates</span>
+    نصيحة: صوّر الورقة من قريب بإضاءة جيدة لنتيجة أدق
+  </div>
+
+  <input type="file" id="fi-cam" accept="image/*" capture="environment" onchange="onPhoto(this)" style="display:none">
+  <input type="file" id="fi-gal" accept="image/*" onchange="onPhoto(this)" style="display:none">
   <div id="idResult"></div>
   <div id="noKeyHint" style="display:none" class="nbox">
     🔑 أدخل مفتاح API في الإعدادات (Plant.id أو Gemini)
