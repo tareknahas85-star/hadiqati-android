@@ -6,10 +6,13 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.os.Message
 import android.provider.MediaStore
 import android.util.Base64
+import android.view.View
 import android.view.WindowManager
 import android.webkit.*
+import android.widget.FrameLayout
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -21,18 +24,18 @@ import java.util.*
 class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
+    private lateinit var container: FrameLayout
     private var cameraUri: Uri? = null
 
-    // ── Launcher: handles camera + gallery results ────────────────────
     private val launcher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val uri: Uri? = when {
-                result.data == null && cameraUri != null -> cameraUri  // camera
-                result.data?.data != null               -> result.data!!.data  // gallery single
+                result.data == null && cameraUri != null -> cameraUri
+                result.data?.data != null               -> result.data!!.data
                 result.data?.clipData != null           ->
-                    result.data!!.clipData!!.getItemAt(0).uri  // gallery multi
+                    result.data!!.clipData!!.getItemAt(0).uri
                 else -> null
             }
             cameraUri = null
@@ -42,9 +45,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ── Read image from URI → base64 → call onNativePhoto() in JS ─────
-    // This is the CORRECT way to pass images to WebView on Android.
-    // File/content URIs are NOT directly readable by WebView file inputs.
     private fun readAndSendImage(uri: Uri) {
         Thread {
             try {
@@ -55,18 +55,16 @@ class MainActivity : AppCompatActivity() {
                 val b64    = Base64.encodeToString(bytes, Base64.NO_WRAP)
                 val data   = "data:$mime;base64,$b64"
                 runOnUiThread {
-                    // evaluateJavascript must run on main thread
                     webView.evaluateJavascript("onNativePhoto('$data')", null)
                 }
             } catch (e: Exception) {
                 runOnUiThread {
-                    webView.evaluateJavascript("toast('❌ خطأ في قراءة الصورة')", null)
+                    webView.evaluateJavascript("toast('\u274c \u062e\u0637\u0623 \u0641\u064a \u0642\u0631\u0627\u0621\u0629 \u0627\u0644\u0635\u0648\u0631\u0629')", null)
                 }
             }
         }.start()
     }
 
-    // ── Camera ────────────────────────────────────────────────────────
     private fun createImageFile(): File? = try {
         val ts  = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
         val dir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
@@ -75,7 +73,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun launchCamera() {
         val file = createImageFile() ?: run {
-            webView.post { webView.evaluateJavascript("toast('❌ لا يمكن الوصول للكاميرا')", null) }
+            webView.post { webView.evaluateJavascript("toast('\u274c \u0644\u0627 \u064a\u0645\u0643\u0646 \u0627\u0644\u0648\u0635\u0648\u0644 \u0644\u0644\u0643\u0627\u0645\u064a\u0631\u0627')", null) }
             return
         }
         cameraUri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", file)
@@ -91,22 +89,12 @@ class MainActivity : AppCompatActivity() {
         launcher.launch(Intent(Intent.ACTION_PICK).apply { type = "image/*" })
     }
 
-    // ── JavaScript ↔ Android Bridge ───────────────────────────────────
     inner class Bridge {
         @JavascriptInterface
         fun openCamera()  = runOnUiThread { launchCamera() }
 
         @JavascriptInterface
         fun openGallery() = runOnUiThread { launchGallery() }
-
-        // Google Sign-In — requires Google Cloud project setup
-        // See: https://console.cloud.google.com → OAuth credentials
-        @JavascriptInterface
-        fun signInWithGoogle() = runOnUiThread {
-            webView.evaluateJavascript(
-                "toast('⚙️ يحتاج ضبط Google Cloud Client ID — راجع الإعدادات')", null
-            )
-        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -117,19 +105,37 @@ class MainActivity : AppCompatActivity() {
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
         )
 
+        container = FrameLayout(this)
+
         webView = WebView(this).apply {
             settings.apply {
-                javaScriptEnabled      = true
-                domStorageEnabled      = true
-                allowFileAccess        = true
-                cacheMode              = WebSettings.LOAD_DEFAULT
-                mixedContentMode       = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+                javaScriptEnabled        = true
+                domStorageEnabled        = true
+                allowFileAccess          = true
+                cacheMode                = WebSettings.LOAD_DEFAULT
+                mixedContentMode         = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+                javaScriptCanOpenWindowsAutomatically = true
+                setSupportMultipleWindows(true)
                 setGeolocationEnabled(true)
             }
-            webViewClient = WebViewClient()
+
+            webViewClient = object : WebViewClient() {
+                override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+                    val url = request.url.toString()
+                    // Allow Google OAuth URLs inside WebView
+                    if (url.contains("accounts.google.com") || url.contains("googleapis.com")) {
+                        return false
+                    }
+                    // External links open in browser
+                    if (url.startsWith("http")) {
+                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                        return true
+                    }
+                    return false
+                }
+            }
+
             webChromeClient = object : WebChromeClient() {
-                // We handle all file/camera via Bridge, not file input
-                // Return true + null to cleanly reject the input mechanism
                 override fun onShowFileChooser(
                     webView: WebView,
                     callback: ValueCallback<Array<Uri>>,
@@ -143,15 +149,70 @@ class MainActivity : AppCompatActivity() {
                     origin: String,
                     callback: GeolocationPermissions.Callback
                 ) { callback.invoke(origin, true, false) }
+
+                // Handle Google Sign-In popup window
+                override fun onCreateWindow(
+                    view: WebView, isDialog: Boolean,
+                    isUserGesture: Boolean, resultMsg: Message?
+                ): Boolean {
+                    val popup = WebView(this@MainActivity).apply {
+                        settings.javaScriptEnabled = true
+                        settings.domStorageEnabled = true
+                        settings.userAgentString = view.settings.userAgentString
+                        webViewClient = object : WebViewClient() {
+                            override fun shouldOverrideUrlLoading(v: WebView, req: WebResourceRequest): Boolean {
+                                return false
+                            }
+                        }
+                        webChromeClient = object : WebChromeClient() {
+                            override fun onCloseWindow(window: WebView) {
+                                container.removeView(window)
+                                window.destroy()
+                            }
+                        }
+                    }
+                    container.addView(popup, FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                        FrameLayout.LayoutParams.MATCH_PARENT
+                    ))
+                    val transport = resultMsg?.obj as? WebView.WebViewTransport
+                    transport?.webView = popup
+                    resultMsg?.sendToTarget()
+                    return true
+                }
+
+                override fun onCloseWindow(window: WebView) {
+                    container.removeView(window)
+                    window.destroy()
+                }
+
+                // Handle JS alerts
+                override fun onJsAlert(
+                    view: WebView, url: String, message: String,
+                    result: JsResult
+                ): Boolean {
+                    return false // default handling
+                }
             }
+
             addJavascriptInterface(Bridge(), "Android")
             loadUrl("file:///android_asset/index.html")
         }
 
-        setContentView(webView)
+        container.addView(webView, FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        ))
+        setContentView(container)
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
+                // Close popup first if exists
+                if (container.childCount > 1) {
+                    val popup = container.getChildAt(container.childCount - 1)
+                    container.removeView(popup)
+                    return
+                }
                 if (webView.canGoBack()) webView.goBack() else finish()
             }
         })
