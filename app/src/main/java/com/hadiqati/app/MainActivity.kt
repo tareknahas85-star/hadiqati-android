@@ -9,6 +9,7 @@ import android.os.Environment
 import android.os.Message
 import android.provider.MediaStore
 import android.util.Base64
+import android.view.View
 import android.view.WindowManager
 import android.webkit.*
 import android.widget.FrameLayout
@@ -165,6 +166,13 @@ class MainActivity : AppCompatActivity() {
                         settings.userAgentString = cleanUserAgent(settings.userAgentString)
 
                         webViewClient = object : WebViewClient() {
+                            override fun onPageStarted(v: WebView, url: String, favicon: android.graphics.Bitmap?) {
+                                // Silent token refresh: keep the popup invisible
+                                if (url.contains("prompt=none") || url.contains("prompt%3Dnone")) {
+                                    v.visibility = View.INVISIBLE
+                                }
+                            }
+
                             override fun shouldOverrideUrlLoading(v: WebView, req: WebResourceRequest): Boolean {
                                 val u = req.url.toString()
                                 // Intercept OAuth redirect
@@ -199,6 +207,8 @@ class MainActivity : AppCompatActivity() {
                                             }
                                             if (token.isNotEmpty()) {
                                                 runOnUiThread {
+                                                    // Persist Google session cookies for silent re-auth
+                                                    CookieManager.getInstance().flush()
                                                     // Pass token back to main WebView
                                                     webView.evaluateJavascript(
                                                         "onOAuthToken('$token','$expires')", null
@@ -207,6 +217,15 @@ class MainActivity : AppCompatActivity() {
                                                     container.removeView(v)
                                                     v.destroy()
                                                 }
+                                            }
+                                        } else if (h.contains("error")) {
+                                            val err = h.removePrefix("#").split("&")
+                                                .firstOrNull { it.startsWith("error=") }
+                                                ?.substringAfter("=") ?: "unknown"
+                                            runOnUiThread {
+                                                webView.evaluateJavascript("onOAuthError('$err')", null)
+                                                container.removeView(v)
+                                                v.destroy()
                                             }
                                         }
                                     }
@@ -229,6 +248,14 @@ class MainActivity : AppCompatActivity() {
                     val transport = resultMsg?.obj as? WebView.WebViewTransport
                     transport?.webView = popup
                     resultMsg?.sendToTarget()
+                    // Watchdog: kill stuck invisible (silent-auth) popups
+                    popup.postDelayed({
+                        if (popup.parent != null && popup.visibility == View.INVISIBLE) {
+                            container.removeView(popup)
+                            popup.destroy()
+                            webView.evaluateJavascript("onOAuthError('timeout')", null)
+                        }
+                    }, 25000)
                     return true
                 }
 

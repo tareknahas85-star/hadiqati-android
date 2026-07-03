@@ -657,13 +657,21 @@ function renderGarden(){
           </div>
         </div>
         <div class="g-card-foot">
-          <button class="g-del-btn" onclick="deletePlant('${p.id}')">🗑️ حذف</button>
+          <button class="g-del-btn" onclick="event.stopPropagation();deletePlant('${p.id}')">🗑️ حذف</button>
+          <button class="g-del-btn" style="color:var(--g2)" onclick="event.stopPropagation();openPlantReminders('${p.id}')">🗓️ ${p.gcalWaterId?'تعديل تذكير':'تذكير'}</button>
           <span style="font-size:11px;color:var(--txt3);align-self:center;margin-right:auto">أُضيف: ${p.addedAt||'–'}</span>
         </div>
       </div>`).join('');
 }
 function deletePlant(id){
   if(!confirm('حذف هذا النبات من حديقتك؟'))return;
+  var pl=getGarden().find(function(x){return x.id===id;});
+  if(pl&&(pl.gcalWaterId||pl.gcalFertId)){
+    ensureGToken().then(function(tk){
+      if(pl.gcalWaterId)gcalDelete(tk,pl.gcalWaterId);
+      if(pl.gcalFertId)gcalDelete(tk,pl.gcalFertId);
+    }).catch(function(){});
+  }
   const g=getGarden().filter(p=>p.id!==id);
   saveGarden(g);
   renderGarden();
@@ -1056,6 +1064,7 @@ function confirmAdd(){
   if(b64){makeThumb(b64,300,function(t){newPlant.photo=t;var gg=getGarden();gg.push(newPlant);saveGarden(gg);});}else{const g=getGarden();g.push(newPlant);saveGarden(g);}
   document.getElementById('modalBg').style.display='none';
   toast(`✅ أُضيفت ${ar} إلى حديقتي`);
+  if(localStorage.getItem('gUserEmail')){setTimeout(function(){openPlantReminders(newPlant.id);},500);}
   const btn=document.getElementById('addBtn');
   if(btn){btn.textContent='✅ تمت الإضافة';btn.disabled=true;btn.style.background='var(--gbg)';btn.style.color='var(--g2)';}
   renderToday();
@@ -1823,17 +1832,22 @@ function downloadBackupPDF(){
 }
 
 
-// Google OAuth
+// Google OAuth (silent-refresh: implicit token renewed via prompt=none hidden popup)
 var GCLIENT_ID = "668068124363-lhoiug35huvsc71i5l96b7q6t7urak5f.apps.googleusercontent.com";
 var gToken = localStorage.getItem('gToken') || '';
 var gTokenExpiry = parseInt(localStorage.getItem('gTokenExpiry') || '0');
+var gSilent = false;
+var gTokenWaiters = [];
+
+function gHasValidToken(){ return gToken && Date.now() < gTokenExpiry - 60000; }
 
 function initGoogleUI(){
-  if(gToken && Date.now() < gTokenExpiry){
+  if(gHasValidToken()){
     showGoogleConnected();
-  } else {
-    gToken = '';
-    localStorage.removeItem('gToken');
+  }else if(localStorage.getItem('gUserEmail')){
+    showGoogleConnected('\u23f3 \u062c\u0627\u0631\u064a \u062a\u062c\u062f\u064a\u062f \u0627\u0644\u062c\u0644\u0633\u0629...');
+    silentGoogleSignIn();
+  }else{
     showGoogleSignIn();
   }
 }
@@ -1841,38 +1855,89 @@ function initGoogleUI(){
 function showGoogleSignIn(){
   var a = document.getElementById('googleSignInArea');
   var c = document.getElementById('googleConnected');
-  if(a) a.style.display = 'block';
-  if(c) c.style.display = 'none';
+  if(a)a.style.display='block';
+  if(c)c.style.display='none';
 }
 
-function showGoogleConnected(){
+function showGoogleConnected(statusMsg){
   var a = document.getElementById('googleSignInArea');
   var c = document.getElementById('googleConnected');
-  if(a) a.style.display = 'none';
-  if(c) c.style.display = 'block';
+  if(a)a.style.display='none';
+  if(c)c.style.display='block';
   var em = document.getElementById('gUserEmail');
   if(em) em.textContent = localStorage.getItem('gUserEmail') || 'Google';
+  var st = document.getElementById('googleStatus');
+  if(st) st.textContent = statusMsg || '';
 }
 
-function doGoogleSignIn(){
+function buildAuthUrl(silent){
   var scope = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/userinfo.email';
+  var email = localStorage.getItem('gUserEmail') || '';
   var url = 'https://accounts.google.com/o/oauth2/v2/auth'
     + '?client_id=' + encodeURIComponent(GCLIENT_ID)
     + '&redirect_uri=' + encodeURIComponent('https://hadiqati-garden.web.app/callback')
     + '&response_type=token'
-    + '&scope=' + encodeURIComponent(scope)
-    + '&prompt=consent';
-  // Opens in popup WebView (handled by MainActivity) with Chrome user agent
-  window.open(url, '_blank');
+    + '&scope=' + encodeURIComponent(scope);
+  if(silent){
+    url += '&prompt=none';
+    if(email) url += '&login_hint=' + encodeURIComponent(email);
+  }else{
+    url += '&prompt=select_account';
+  }
+  return url;
 }
-// Called from popup redirect or manually
+
+function doGoogleSignIn(){
+  gSilent = false;
+  window.open(buildAuthUrl(false), '_blank');
+}
+
+function silentGoogleSignIn(){
+  if(gSilent) return;
+  gSilent = true;
+  window.open(buildAuthUrl(true), '_blank');
+}
+
+// Called from popup redirect (MainActivity)
 function onOAuthToken(token, expiresIn){
   gToken = token;
   gTokenExpiry = Date.now() + (parseInt(expiresIn || '3600') * 1000);
   localStorage.setItem('gToken', gToken);
   localStorage.setItem('gTokenExpiry', gTokenExpiry.toString());
+  gSilent = false;
+  var w = gTokenWaiters; gTokenWaiters = [];
+  w.forEach(function(x){ try{x.res(gToken);}catch(e){} });
   fetchGoogleEmail();
   showGoogleConnected();
+}
+
+// Called from popup redirect on OAuth error (e.g. login_required) or watchdog timeout
+function onOAuthError(err){
+  var wasSilent = gSilent;
+  gSilent = false;
+  var w = gTokenWaiters; gTokenWaiters = [];
+  w.forEach(function(x){ try{x.rej(err);}catch(e){} });
+  if(wasSilent){
+    gToken = '';
+    localStorage.removeItem('gToken');
+    localStorage.removeItem('gTokenExpiry');
+    showGoogleSignIn();
+    toast('\ud83d\udd11 \u0627\u0646\u062a\u0647\u062a \u062c\u0644\u0633\u0629 Google \u2014 \u0633\u062c\u0651\u0644 \u062f\u062e\u0648\u0644 \u0645\u0631\u0629 \u0648\u062d\u062f\u0629');
+  }
+}
+
+// Returns a Promise for a valid token, silently refreshing if needed
+function ensureGToken(){
+  return new Promise(function(res, rej){
+    if(gHasValidToken()){ res(gToken); return; }
+    gTokenWaiters.push({res:res, rej:rej});
+    silentGoogleSignIn();
+    setTimeout(function(){
+      for(var i=0;i<gTokenWaiters.length;i++){
+        if(gTokenWaiters[i].res===res){ gTokenWaiters.splice(i,1); rej('timeout'); return; }
+      }
+    }, 25000);
+  });
 }
 
 function fetchGoogleEmail(){
@@ -1895,6 +1960,115 @@ function doGoogleSignOut(){
   localStorage.removeItem('gUserEmail');
   showGoogleSignIn();
   alert('\u062a\u0645 \u062a\u0633\u062c\u064a\u0644 \u0627\u0644\u062e\u0631\u0648\u062c');
+}
+
+// ── GOOGLE CALENDAR REMINDERS (per-plant recurring watering/fertilizing) ──
+var WRRULE={daily:'RRULE:FREQ=DAILY',flex:'RRULE:FREQ=DAILY',alt:'RRULE:FREQ=DAILY;INTERVAL=2',e3:'RRULE:FREQ=DAILY;INTERVAL=3',e6:'RRULE:FREQ=DAILY;INTERVAL=6'};
+var FRRULE={bw:'RRULE:FREQ=DAILY;INTERVAL=15',mo:'RRULE:FREQ=MONTHLY',mi:'RRULE:FREQ=MONTHLY'};
+function gcalTZ(){try{return Intl.DateTimeFormat().resolvedOptions().timeZone||'Asia/Damascus';}catch(e){return 'Asia/Damascus';}}
+function gcalStart(timeStr){
+  var p=(timeStr||'19:00').split(':');
+  var d=new Date();d.setHours(parseInt(p[0],10),parseInt(p[1],10),0,0);
+  if(d<=new Date())d.setDate(d.getDate()+1);
+  return d;
+}
+function gcalISO(d){function z(n){return (n<10?'0':'')+n;}return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate())+'T'+z(d.getHours())+':'+z(d.getMinutes())+':00';}
+function gcalInsert(token,ev){
+  return fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events',{
+    method:'POST',
+    headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+    body:JSON.stringify(ev)
+  }).then(function(r){if(!r.ok)throw new Error('gcal '+r.status);return r.json();});
+}
+function gcalDelete(token,evId){
+  return fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events/'+encodeURIComponent(evId),{
+    method:'DELETE',headers:{'Authorization':'Bearer '+token}
+  }).catch(function(){});
+}
+function openPlantReminders(id){
+  var p=getGarden().find(function(x){return x.id===id;});
+  if(!p)return;
+  var old=document.getElementById('gcalModal');if(old)old.remove();
+  var hasF=p.ff!=='ban';
+  var div=document.createElement('div');
+  div.id='gcalModal';
+  div.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+  div.innerHTML='<div style="background:var(--card,#fff);border-radius:16px;padding:20px;max-width:340px;width:100%">'
+    +'<div style="font-weight:800;font-size:16px;margin-bottom:4px">\ud83d\uddd3\ufe0f تذكير تقويم Google \u2014 '+p.e+' '+p.ar+'</div>'
+    +'<div style="font-size:12px;color:var(--txt3);margin-bottom:12px">أحداث متكررة بتقويم Google مع تنبيه بالوقت يلي بتختارو</div>'
+    +'<div class="lbl" style="font-size:13px">\ud83d\udca7 وقت الري ('+(WLBL[p.wf]||'')+')</div>'
+    +'<input type="time" id="gcalWTime" value="'+(localStorage.getItem('notifTime')||'19:00')+'" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;font-size:16px;font-family:inherit;text-align:center;margin:6px 0 12px">'
+    +(hasF
+      ?'<div class="lbl" style="font-size:13px">\ud83c\udf31 وقت التسميد ('+(FLBL[p.ff]||'')+' \u2014 '+(p.fd||'')+')</div>'
+       +'<input type="time" id="gcalFTime" value="09:00" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;font-size:16px;font-family:inherit;text-align:center;margin:6px 0 12px">'
+      :'<div class="hint" style="margin-bottom:12px">\u26d4 هالنبتة التسميد محظور \u2014 رح ينضاف تذكير الري فقط</div>')
+    +'<button class="btn btn-p" style="width:100%;margin-bottom:8px" onclick="savePlantReminders(\''+p.id+'\')">\u2705 '+(p.gcalWaterId?'تحديث التذكير':'إضافة للتقويم')+'</button>'
+    +(p.gcalWaterId?'<button class="btn btn-s" style="width:100%;margin-bottom:8px" onclick="removePlantReminders(\''+p.id+'\')">\ud83d\uddd1\ufe0f إزالة التذكير من التقويم</button>':'')
+    +'<button class="btn btn-s" style="width:100%" onclick="document.getElementById(\'gcalModal\').remove()">إلغاء</button>'
+    +'</div>';
+  document.body.appendChild(div);
+}
+function savePlantReminders(id){
+  var p=getGarden().find(function(x){return x.id===id;});
+  if(!p)return;
+  var wT=(document.getElementById('gcalWTime')||{}).value||'19:00';
+  var fEl=document.getElementById('gcalFTime');
+  var fT=fEl?(fEl.value||'09:00'):null;
+  var m=document.getElementById('gcalModal');if(m)m.remove();
+  toast('\u23f3 عم ضيف التذكيرات للتقويم...');
+  var tok='';
+  ensureGToken().then(function(tk){
+    tok=tk;
+    var jobs=[];
+    if(p.gcalWaterId)jobs.push(gcalDelete(tk,p.gcalWaterId));
+    if(p.gcalFertId)jobs.push(gcalDelete(tk,p.gcalFertId));
+    return Promise.all(jobs);
+  }).then(function(){
+    var tz=gcalTZ();
+    var ws=gcalStart(wT),we=new Date(ws.getTime()+30*60000);
+    var calls=[gcalInsert(tok,{
+      summary:'\ud83d\udca7 ري '+p.ar,
+      description:'تذكير ري من تطبيق حديقتي \u2014 '+(WLBL[p.wf]||''),
+      start:{dateTime:gcalISO(ws),timeZone:tz},
+      end:{dateTime:gcalISO(we),timeZone:tz},
+      recurrence:[WRRULE[p.wf]||'RRULE:FREQ=DAILY'],
+      reminders:{useDefault:false,overrides:[{method:'popup',minutes:0}]}
+    })];
+    if(p.ff!=='ban'&&fT){
+      var fs=gcalStart(fT),fe=new Date(fs.getTime()+30*60000);
+      calls.push(gcalInsert(tok,{
+        summary:'\ud83c\udf31 تسميد '+p.ar+' \u2014 '+(p.fd||''),
+        description:'نوع السماد: '+(p.fd||'')+' \u2014 '+(FLBL[p.ff]||'')+' (تطبيق حديقتي)',
+        start:{dateTime:gcalISO(fs),timeZone:tz},
+        end:{dateTime:gcalISO(fe),timeZone:tz},
+        recurrence:[FRRULE[p.ff]||'RRULE:FREQ=MONTHLY'],
+        reminders:{useDefault:false,overrides:[{method:'popup',minutes:0}]}
+      }));
+    }
+    return Promise.all(calls);
+  }).then(function(res){
+    var g=getGarden();
+    var p2=g.find(function(x){return x.id===id;});
+    if(p2){p2.gcalWaterId=res[0].id;p2.gcalFertId=res[1]?res[1].id:null;saveGarden(g);}
+    toast('\u2705 انضافت تذكيرات '+p.ar+' على تقويم Google');
+    renderGarden();
+  }).catch(function(e){
+    toast('\u26a0\ufe0f ما قدرت ضيف للتقويم \u2014 تأكد من تسجيل دخول Google');
+  });
+}
+function removePlantReminders(id){
+  var m=document.getElementById('gcalModal');if(m)m.remove();
+  ensureGToken().then(function(tk){
+    var g=getGarden();
+    var p=g.find(function(x){return x.id===id;});
+    if(!p)return;
+    if(p.gcalWaterId)gcalDelete(tk,p.gcalWaterId);
+    if(p.gcalFertId)gcalDelete(tk,p.gcalFertId);
+    p.gcalWaterId=null;p.gcalFertId=null;
+    saveGarden(g);
+    toast('\ud83d\uddd1\ufe0f انشالت التذكيرات من التقويم');
+    renderGarden();
+  }).catch(function(){toast('\u26a0\ufe0f ما قدرت وصل للتقويم');});
 }
 
 // Google Drive Backup - upload PDF
