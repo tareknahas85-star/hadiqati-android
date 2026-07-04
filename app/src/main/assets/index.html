@@ -1842,11 +1842,10 @@ var gTokenWaiters = [];
 function gHasValidToken(){ return gToken && Date.now() < gTokenExpiry - 60000; }
 
 function initGoogleUI(){
-  if(gHasValidToken()){
+  // No silent refresh at startup: token renews lazily via ensureGToken()
+  // only when a Drive/Calendar call actually needs it (avoids popup on app open)
+  if(gHasValidToken() || localStorage.getItem('gUserEmail')){
     showGoogleConnected();
-  }else if(localStorage.getItem('gUserEmail')){
-    showGoogleConnected('\u23f3 \u062c\u0627\u0631\u064a \u062a\u062c\u062f\u064a\u062f \u0627\u0644\u062c\u0644\u0633\u0629...');
-    silentGoogleSignIn();
   }else{
     showGoogleSignIn();
   }
@@ -1889,12 +1888,15 @@ function buildAuthUrl(silent){
 
 function doGoogleSignIn(){
   gSilent = false;
+  try{ if(window.Android && Android.setPopupSilent) Android.setPopupSilent(false); }catch(e){}
   window.open(buildAuthUrl(false), '_blank');
 }
 
 function silentGoogleSignIn(){
   if(gSilent) return;
   gSilent = true;
+  // Tell native layer the next popup is a hidden silent-refresh window
+  try{ if(window.Android && Android.setPopupSilent) Android.setPopupSilent(true); }catch(e){}
   window.open(buildAuthUrl(true), '_blank');
 }
 

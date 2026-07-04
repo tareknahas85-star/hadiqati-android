@@ -27,6 +27,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var container: FrameLayout
     private var cameraUri: Uri? = null
 
+    // Set from JS right before window.open(): true = hidden silent token refresh
+    @Volatile private var nextPopupSilent = false
+
     private val launcher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -99,6 +102,9 @@ class MainActivity : AppCompatActivity() {
 
         @JavascriptInterface
         fun openGallery() = runOnUiThread { launchGallery() }
+
+        @JavascriptInterface
+        fun setPopupSilent(silent: Boolean) { nextPopupSilent = silent }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -159,7 +165,13 @@ class MainActivity : AppCompatActivity() {
                     view: WebView, isDialog: Boolean,
                     isUserGesture: Boolean, resultMsg: Message?
                 ): Boolean {
+                    // Capture + reset the silent flag set from JS before window.open()
+                    val isSilent = nextPopupSilent
+                    nextPopupSilent = false
                     val popup = WebView(this@MainActivity).apply {
+                        // Silent refresh windows must NEVER be visible, even on
+                        // Google error pages whose URL no longer contains prompt=none
+                        if (isSilent) visibility = View.INVISIBLE
                         settings.javaScriptEnabled = true
                         settings.domStorageEnabled = true
                         // Same clean user agent for popup
@@ -185,6 +197,17 @@ class MainActivity : AppCompatActivity() {
                             }
 
                             override fun onPageFinished(v: WebView, url: String) {
+                                // Google terminal error page (e.g. invalid_client / access blocked):
+                                // never redirects to callback, so close silent popups here
+                                if (isSilent && url.contains("accounts.google.com") &&
+                                    (url.contains("/oauth/error") || url.contains("authError"))) {
+                                    runOnUiThread {
+                                        webView.evaluateJavascript("onOAuthError('oauth_error')", null)
+                                        container.removeView(v)
+                                        v.destroy()
+                                    }
+                                    return
+                                }
                                 // Check if we landed on the callback page
                                 if (url.startsWith("https://hadiqati-garden.web.app/callback")) {
                                     // Extract token from URL fragment via JS
@@ -248,9 +271,9 @@ class MainActivity : AppCompatActivity() {
                     val transport = resultMsg?.obj as? WebView.WebViewTransport
                     transport?.webView = popup
                     resultMsg?.sendToTarget()
-                    // Watchdog: kill stuck invisible (silent-auth) popups
+                    // Watchdog: kill stuck silent-auth popups (regardless of visibility)
                     popup.postDelayed({
-                        if (popup.parent != null && popup.visibility == View.INVISIBLE) {
+                        if (popup.parent != null && (isSilent || popup.visibility == View.INVISIBLE)) {
                             container.removeView(popup)
                             popup.destroy()
                             webView.evaluateJavascript("onOAuthError('timeout')", null)
