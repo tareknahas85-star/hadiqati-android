@@ -1,71 +1,71 @@
 # Hadiqati (حديقتي)
 
-**[⬇️ حمّل الـ APK (آخر نسخة)](https://github.com/tareknahas85-star/hadiqati-android/releases/download/latest/hadiqati.apk)** &nbsp;|&nbsp; **[⬇️ Download latest APK](https://github.com/tareknahas85-star/hadiqati-android/releases/download/latest/hadiqati.apk)**
-
----
-
-## بالعربي
-
-تطبيق أندرويد لحدائق السطوح: صوّر النبتة وتطبيق بيقلك شو هي، وبيعطيك نصائح عناية، وبيفكّرك بمواعيد سقي/عناية. عربي أولاً، مع دعم كامل لـ RTL.
-
-### شو فيه
-- تمييز النبتة من صورة (تصوير مباشر من الكاميرا، بيتصغّر تلقائياً قبل الرفع)
-- نصائح عناية حسب موقعك
-- تذكيرات عناية عبر الإشعارات
-- تسجيل دخول بحساب Google
-- واجهة عربية أولاً مع RTL كامل
-
-### التقنية
-- تطبيق هجين (WebView) بيغلّف تجربة حديقتي على الويب
-- غلاف Kotlin أصلي
-- بناء APK تلقائي عبر GitHub Actions
-
-### شو بدك
-- صلاحيات أندرويد: كاميرا، موقع (دقيق وتقريبي)، إشعارات (أندرويد 13+)
-- FileProvider لصور الكاميرا
-
-### البناء
-**GitHub Actions (موصى فيه):** ادفع (push) للريبو، والـ workflow بينشر الـ APK مباشرة على [صفحة الـ Releases](https://github.com/tareknahas85-star/hadiqati-android/releases/tag/latest).
-
-**محلياً:**
-```bash
-gradle assembleDebug
-```
-المخرج: `app/build/outputs/apk/debug/app-debug.apk`
-
-### كيف بيشتغل
-التطبيق بيغلّف تطبيق حديقتي (ويب) جوا WebView أندرويد، وبيضيف تصوير كاميرا أصلي مع تصغير الصورة قبل التمييز، موقع الجهاز، وإشعارات لتذكيرات العناية. تسجيل الدخول بـ Google بيصير من جوا الـ WebView مع اعتراض الـ redirect.
+**[⬇️ Download latest APK](https://github.com/tareknahas85-star/hadiqati-android/releases/download/latest/hadiqati.apk)** &nbsp;|&nbsp; **[⬇️ حمّل آخر نسخة APK](https://github.com/tareknahas85-star/hadiqati-android/releases/download/latest/hadiqati.apk)**
 
 ---
 
 ## In English
 
-Android app for rooftop garden care: snap a photo of a plant to identify it, get care tips, and keep track of your rooftop garden. Arabic-first, with full RTL support.
+An Android app for rooftop gardens. Take a photo of a plant and the app tells you what it is, gives you care tips, and reminds you when to water it. The app is in Arabic first, and works right to left.
 
-### Features
-- Plant identification from a photo (camera capture, auto-resized before upload)
-- Location-aware care tips
-- Care reminders via notifications
-- Google sign-in
-- Arabic-first UI with full RTL support
+### What it does
 
-### Tech stack
-- Android WebView-based hybrid app wrapping the Hadiqati web experience
-- Kotlin native shell
-- Automated APK builds via GitHub Actions
+- Tells you the name of a plant from a photo you take
+- Gives care tips based on where you live
+- Sends you reminders to take care of your plants
+- Sign in with your Google account
+- Arabic screens, right to left
 
-### Requirements
-- Android permissions: Camera, Location (fine and coarse), Notifications (Android 13+)
-- FileProvider for camera photo output
+### What you need
 
-### Build
-**GitHub Actions (recommended):** push to the repo and the workflow publishes the APK straight to the [Releases page](https://github.com/tareknahas85-star/hadiqati-android/releases/tag/latest).
+Permissions on the phone: camera, location, and notifications (on Android 13 or newer).
 
-**Locally:**
+### How to build it
+
+**With GitHub Actions (easier):** push your changes to the repo, and the app file is published on the [releases page](https://github.com/tareknahas85-star/hadiqati-android/releases/tag/latest).
+
+**On your computer:**
+
 ```bash
 gradle assembleDebug
 ```
-Output: `app/build/outputs/apk/debug/app-debug.apk`
+
+The app file comes out at `app/build/outputs/apk/debug/app-debug.apk`.
 
 ### How it works
-The app wraps the Hadiqati web app in an Android WebView, adding native camera capture with image resizing before plant identification, device location, and push notifications for care reminders. Google sign-in is handled through the WebView with redirect interception.
+
+The app is a small Android shell written in Kotlin. Inside it, it opens the Hadiqati web app. The shell adds the parts the web cannot do alone: taking the photo with the camera, making the photo smaller before sending it, reading your location, and showing reminders.
+
+---
+
+## بالعربي
+
+تطبيق أندرويد لحدائق السطوح. تصوّر النبتة والتطبيق يخبرك ما هي، ويعطيك نصائح للعناية بها، ويذكّرك بموعد سقايتها. التطبيق بالعربي أولاً، ويعمل من اليمين إلى اليسار.
+
+### ماذا يفعل
+
+- يخبرك باسم النبتة من صورة تلتقطها
+- يعطيك نصائح عناية حسب المكان الذي تسكن فيه
+- يرسل لك تذكيرات للعناية بنباتاتك
+- تسجيل الدخول بحساب Google
+- شاشات عربية، من اليمين إلى اليسار
+
+### ما الذي يحتاجه
+
+صلاحيات على الهاتف: الكاميرا، والموقع، والإشعارات (على أندرويد 13 أو أحدث).
+
+### كيف تبنيه
+
+**عبر GitHub Actions (الأسهل):** ارفع تعديلاتك إلى الريبو، وسيُنشر ملف التطبيق في [صفحة الإصدارات](https://github.com/tareknahas85-star/hadiqati-android/releases/tag/latest).
+
+**على جهازك:**
+
+```bash
+gradle assembleDebug
+```
+
+يخرج ملف التطبيق في `app/build/outputs/apk/debug/app-debug.apk`.
+
+### كيف يعمل
+
+التطبيق عبارة عن غلاف أندرويد صغير مكتوب بـ Kotlin. وبداخله يفتح تطبيق حديقتي على الويب. الغلاف يضيف الأشياء التي لا يستطيع الويب فعلها وحده: التقاط الصورة بالكاميرا، وتصغير الصورة قبل إرسالها، وقراءة موقعك، وعرض التذكيرات.
