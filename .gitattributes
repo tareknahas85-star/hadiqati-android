@@ -1,0 +1,8 @@
+# GitHub decides the language of a repo by how many bytes each language takes.
+# The web files inside assets/ are bigger than the Kotlin shell, so GitHub was
+# showing this app as "HTML". These lines tell GitHub to skip the web files
+# when it counts, so the app shows as Kotlin, which is what it really is.
+#
+# This changes nothing in the build. It only affects the label on GitHub.
+
+app/src/main/assets/** linguist-vendored
