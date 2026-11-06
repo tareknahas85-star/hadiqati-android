@@ -79,3 +79,10 @@ gradle assembleDebug
 ### كيف بيشتغل
 
 التطبيق عبارة عن غلاف أندرويد صغير مكتوب بـ Kotlin. وجواتو بيفتح تطبيق حديقتي عالويب. الغلاف بيضيف الشغلات اللي الويب ما بيقدر يعملها لحالو: التقاط الصورة بالكاميرا، وتصغير الصورة قبل ما تنبعت، وقراءة موقعك، وعرض التذكيرات.
+
+
+## Contribute · ساهم معنا
+
+Want to help? Read [CONTRIBUTING.md](CONTRIBUTING.md). Issues labelled [`good first issue`](../../labels/good%20first%20issue) are an easy start, and questions or ideas are welcome in [Discussions](../../discussions).
+
+بدك تساعد؟ اقرا [CONTRIBUTING.md](CONTRIBUTING.md). المهام اللي عليها [`good first issue`](../../labels/good%20first%20issue) بداية سهلة، وأي سؤال أو فكرة احكيها بـ [Discussions](../../discussions).
