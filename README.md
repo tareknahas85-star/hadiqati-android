@@ -1,6 +1,16 @@
 # Hadiqati (حديقتي)
 
+**An Android app for rooftop gardens: snap a plant, find out what it is, and get reminded to look after it.**
+**تطبيق أندرويد لحدائق السطوح: صوّر النبتة، اعرف شو هي، وبيذكّرك تعتني فيها.**
+
+![Hadiqati poster](docs/Hadiqati-poster.png)
+
 **[⬇️ Download latest APK](https://github.com/tareknahas85-star/hadiqati-android/releases/download/latest/hadiqati.apk)** &nbsp;|&nbsp; **[⬇️ حمّل آخر نسخة APK](https://github.com/tareknahas85-star/hadiqati-android/releases/download/latest/hadiqati.apk)**
+
+[English](#in-english) &nbsp;·&nbsp; [بالعربي](#بالعربي)
+
+> **Keys:** to identify plants, the app asks you to enter your own Plant.id and Google Gemini API keys inside the app.
+> **المفاتيح:** عشان يتعرّف عالنباتات، التطبيق بيطلب منك تدخل مفاتيح Plant.id وGoogle Gemini الخاصة فيك جوا التطبيق.
 
 ---
 
