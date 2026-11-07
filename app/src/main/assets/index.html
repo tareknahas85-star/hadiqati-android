@@ -819,26 +819,13 @@ async function doIdentifyGemini(){
   const key=localStorage.getItem('gkey');
   if(!key){showScr('Settings');throw new Error('حط مفتاح Gemini بالإعدادات');}
   const prompt=`You are a plant expert. Analyze this image and respond ONLY with JSON, no extra text: {"is_plant":true,"name_ar":"Arabic name","name_sci":"Scientific name","confidence":95,"category":"fruit or herb or veg or succulent or flower or tree or custom","sun":"full or partial or shade","root":"shallow or medium or deep","water":"watering desc in Arabic","fertilize":"fertilizing desc in Arabic","care_notes":"care notes in Arabic","location_tip":"best location in Arabic","pot_tip":"pot advice in Arabic","best_water_time":"best watering time in Arabic","is_healthy":true,"disease_name":"","disease_pct":0,"disease_desc":"","disease_treatment":""}`;
-  // AQ. keys need x-goog-api-key header; AIzaSy keys can use ?key= param
-  const isAQKey=key.startsWith('AQ.');
-  const url=isAQKey
-    ?'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent'
-    :`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
-  const hdrs={'Content-Type':'application/json'};
-  if(isAQKey)hdrs['x-goog-api-key']=key;
-  const res=await fetch(url,{method:'POST',headers:hdrs,
-     body:JSON.stringify({
-       contents:[{parts:[
-         {inline_data:{mime_type:'image/jpeg',data:b64}},
-         {text:prompt}
-       ]}],
-       generationConfig:{temperature:0.1,topP:0.8}
-     })}
-  );
-  if(res.status===400)throw new Error('400 — مفتاح Gemini مو صالح');
-  if(res.status===429)throw new Error('429 — وصلت للحد اليومي (1500/يوم) — جرّب بكرا');
-  if(!res.ok)throw new Error('خطأ '+res.status+' من Gemini API');
-  const data=await res.json();
+  const data=await gemGenerate({
+    contents:[{parts:[
+      {inline_data:{mime_type:'image/jpeg',data:b64}},
+      {text:prompt}
+    ]}],
+    generationConfig:{temperature:0.1,topP:0.8}
+  });
   const txt=data.candidates?.[0]?.content?.parts?.[0]?.text||'{}';
   let parsed;
   try{parsed=JSON.parse(txt.replace(/```json|```/g,'').trim());}
@@ -1309,28 +1296,38 @@ function askGemini(pid){
   if(!q)return;
   var el=document.getElementById('gardenBody');
   el.innerHTML='<div class="loading"><div class="spin"></div><p style="margin-top:10px">Gemini عم يفكر...</p></div>';
-  var isAQ=key.startsWith('AQ.');
-  var url=isAQ?'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent':'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+key;
-  var hdrs={'Content-Type':'application/json'};
-  if(isAQ)hdrs['x-goog-api-key']=key;
-  fetch(url,{method:'POST',headers:hdrs,body:JSON.stringify({contents:[{parts:[{text:'أنت خبير نباتات. النبتة: '+p.ar+' ('+p.en+'). '+q+'. أجب بالعامية الشامية باختصار.'}]}],generationConfig:{temperature:0.3}})}).then(function(r){return r.json();}).then(function(data){
+  gemGenerate({contents:[{parts:[{text:'أنت خبير نباتات. النبتة: '+p.ar+' ('+p.en+'). '+q+'. أجب بالعامية الشامية باختصار.'}]}],generationConfig:{temperature:0.3}}).then(function(data){
     var txt=(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts[0].text)||'ما قدر يجاوب';
     txt=txt.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
     el.innerHTML='<div style="padding:8px 0"><button onclick="showPlantDetail(\''+pid+'\')" style="background:none;border:none;color:var(--g2);font-size:14px;font-weight:700;cursor:pointer;padding:8px 0;font-family:inherit">\u2192 رجوع</button><div class="card"><div class="card-hd">\U0001f4ac '+p.ar+'</div><div style="font-size:13px;color:var(--txt2);line-height:2">'+txt+'</div></div></div>';
   }).catch(function(e){toast('خطأ: '+e.message);showPlantDetail(pid);});
 }
 
+var GEM_MODELS=['gemini-3.5-flash','gemini-3.6-flash','gemini-3.5-flash-lite','gemini-flash-lite-latest'];
+async function gemGenerate(payload){
+  var key=localStorage.getItem('gkey');
+  var isAQ=key.startsWith('AQ.');
+  var hdrs={'Content-Type':'application/json'};
+  if(isAQ)hdrs['x-goog-api-key']=key;
+  var lastErr='';
+  for(var i=0;i<GEM_MODELS.length;i++){
+    var url='https://generativelanguage.googleapis.com/v1beta/models/'+GEM_MODELS[i]+':generateContent'+(isAQ?'':'?key='+key);
+    var res=await fetch(url,{method:'POST',headers:hdrs,body:JSON.stringify(payload)});
+    if(res.ok)return res.json();
+    var msg='';
+    try{var ej=await res.json();msg=(ej.error&&ej.error.message)||'';}catch(e){}
+    lastErr=res.status+(msg?' - '+msg.slice(0,160):'');
+    if([404,429,500,503].indexOf(res.status)<0)break;
+  }
+  throw new Error(lastErr||'Gemini API');
+}
 // ── GEMINI HELPER ────────────────────────────────────────────────────
 function geminiCall(prompt,cb,imgB64){
   var key=localStorage.getItem('gkey');
   if(!key){toast('فعّل Gemini من الإعدادات');return;}
-  var isAQ=key.startsWith('AQ.');
-  var url=isAQ?'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent':'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+key;
-  var hdrs={'Content-Type':'application/json'};
-  if(isAQ)hdrs['x-goog-api-key']=key;
   var parts=[{text:prompt}];
   if(imgB64)parts.unshift({inline_data:{mime_type:'image/jpeg',data:imgB64}});
-  fetch(url,{method:'POST',headers:hdrs,body:JSON.stringify({contents:[{parts:parts}],generationConfig:{temperature:0.3}})}).then(function(r){return r.json();}).then(function(data){
+  gemGenerate({contents:[{parts:parts}],generationConfig:{temperature:0.3}}).then(function(data){
     var txt=(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts[0].text)||'';
     cb(txt);
   }).catch(function(e){cb('خطأ: '+e.message);});
