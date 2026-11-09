@@ -63,7 +63,7 @@ The app file comes out at `app/build/outputs/apk/debug/app-debug.apk`.
 
 ### How it works
 
-The app is a small Android shell written in Kotlin. Inside it, it opens the Hadiqati web app. The shell adds the parts the web cannot do alone: taking the photo with the camera, making the photo smaller before sending it, reading your location, and showing reminders.
+The app is a small Android shell written in Kotlin. Inside it, it opens the Hadiqati page from files bundled inside the app (`file:///android_asset/index.html`). The shell adds the parts the page cannot do alone: taking the photo with the camera, making the photo smaller before sending it, reading your location, and showing reminders.
 
 ---
 
@@ -97,7 +97,7 @@ gradle assembleDebug
 
 ### كيف بيشتغل
 
-التطبيق عبارة عن غلاف أندرويد صغير مكتوب بـ Kotlin. وجواتو بيفتح تطبيق حديقتي عالويب. الغلاف بيضيف الشغلات اللي الويب ما بيقدر يعملها لحالو: التقاط الصورة بالكاميرا، وتصغير الصورة قبل ما تنبعت، وقراءة موقعك، وعرض التذكيرات.
+التطبيق عبارة عن غلاف أندرويد صغير مكتوب بـ Kotlin. وجواتو بيفتح صفحة حديقتي من ملفات داخلية مضمّنة بالتطبيق (`file:///android_asset/index.html`). الغلاف بيضيف الشغلات اللي الصفحة ما بتقدر تعملها لحالها: التقاط الصورة بالكاميرا، وتصغير الصورة قبل ما تنبعت، وقراءة موقعك، وعرض التذكيرات.
 
 
 ## Contribute · ساهم معنا
