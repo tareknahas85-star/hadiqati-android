@@ -12,6 +12,25 @@
 > **Keys:** to identify plants, the app asks you to enter your own Plant.id and Google Gemini API keys inside the app.
 > **المفاتيح:** عشان يتعرّف عالنباتات، التطبيق بيطلب منك تدخل مفاتيح Plant.id وGoogle Gemini الخاصة فيك جوا التطبيق.
 
+## Download · التحميل
+
+| 📘 Guide · الدليل | 📱 App · التطبيق |
+|---|---|
+| [⬇️ Interactive guide · الدليل التفاعلي](https://github.com/tareknahas85-star/hadiqati-android/releases/download/v1.0.0/Hadiqati-Guide.html) | [⬇️ hadiqati.apk](https://github.com/tareknahas85-star/hadiqati-android/releases/download/latest/hadiqati.apk) |
+
+📘 **Start here:** the interactive guide is one HTML file that works offline on any device. Download it and open it in any browser.
+📘 **ابدأ من هون:** الدليل التفاعلي ملف واحد بيشتغل بلا نت على أي جهاز. نزّلو وافتحو بأي متصفح.
+
+The app is a debug build for trying out. The guide's checksum is in `SHA256SUMS.txt` on the [guide release](https://github.com/tareknahas85-star/hadiqati-android/releases/tag/v1.0.0).
+التطبيق نسخة تجريبية (debug) للتجربة. الـchecksum تبع الدليل بملف `SHA256SUMS.txt` بـ[صفحة إصدار الدليل](https://github.com/tareknahas85-star/hadiqati-android/releases/tag/v1.0.0).
+
+## Videos · الفيديوهات
+
+🎬 Watch the whole thing on YouTube (made with AI help, Shami voice) · شوف كل شي عاليوتيوب (معمول بمساعدة الذكاء الاصطناعي، وصوت شامي):
+
+- ▶️ [Full walkthrough · الشرح الكامل](https://www.youtube.com/playlist?list=PLZdO7ODf-1TU)
+- 📺 [Step by step · خطوة بخطوة](https://www.youtube.com/playlist?list=PLFeR9aold_Xg)
+
 ---
 
 ## In English
